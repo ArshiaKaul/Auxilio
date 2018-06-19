@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+xmlns:app="http://schemas.android.com/apk/res-auto"
+xmlns:tools="http://schemas.android.com/tools"
+android:layout_width="match_parent"
+android:layout_height="match_parent"
+android:orientation="vertical"
+android:background="#ffffff"
+android:gravity="center_horizontal"
+tools:context="com.example.pooja.auxilio.GestureActivity">
+
+<TextView
+
+    android:id="@+id/textViewRecognizePerson"
+    android:layout_height="wrap_content"
+    android:layout_width="wrap_content"
+    android:textColor="#ffffff"
+    android:background="#007B9F"
+    android:textSize="40sp"
+    android:textAlignment="center"
+    android:text="@string/swipe_up"
+    android:textAllCaps="true"
+    android:textStyle="bold"
+    android:fontFamily="sans-serif-condensed"
+    />
+
+
+<ImageView
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:id="@+id/swipeUp"
+    android:layout_marginTop="20dp"
+
+    android:src="@drawable/swipe_up" />
+
+<TextView
+
+    android:id="@+id/textViewAddContact"
+    android:layout_height="wrap_content"
+    android:layout_width="wrap_content"
+    android:textColor="#ffffff"
+    android:background="#007B9F"
+    android:textSize="40sp"
+    android:textAlignment="center"
+    android:text="@string/swipe_down"
+    android:textAllCaps="true"
+    android:textStyle="bold"
+    android:fontFamily="sans-serif-condensed"
+    android:layout_marginTop="40dp"
+    />
+
+
+<ImageView
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:id="@+id/swipeDown"
+    android:src="@drawable/swipe_down"
+    android:layout_marginTop="20dp"
+    />
+
+</LinearLayout>

@@ -1,0 +1,10 @@
+<component name="libraryTable">
+  <library name="play-services-flags-15.0.1">
+    <CLASSES>
+      <root url="jar://$USER_HOME$/.android/build-cache/35caa9f9be695630cd2c8fae07bdcd96c02e5e60/output/jars/classes.jar!/" />
+      <root url="file://$USER_HOME$/.android/build-cache/35caa9f9be695630cd2c8fae07bdcd96c02e5e60/output/res" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>

@@ -1,0 +1,26 @@
+[
+    {
+        "outputFile": "C:\\Users\\arshi\\Downloads\\Auxilio-20180616T182255Z-001\\Auxilio\\app\\build\\intermediates\\incremental\\mergeDebugAndroidTestResources\\merged.dir\\values\\values.xml",
+        "map": [
+            {
+                "to": {
+                    "startLine": 2,
+                    "startColumn": 4,
+                    "startOffset": 55,
+                    "endColumn": 45,
+                    "endOffset": 96
+                },
+                "from": {
+                    "file": "C:\\Users\\arshi\\.android\\build-cache\\77c2fdf0370eb5cd45dd3f5af90e0a956f078202\\output\\res\\values\\values.xml",
+                    "position": {
+                        "startLine": 4,
+                        "startColumn": 4,
+                        "startOffset": 229,
+                        "endColumn": 45,
+                        "endOffset": 270
+                    }
+                }
+            }
+        ]
+    }
+]

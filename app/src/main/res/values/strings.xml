@@ -1,0 +1,14 @@
+<resources>
+    <string name="app_name">Auxilio</string>
+    <string name="Welcome_string">Welcome to Auxilio!!!</string>
+    <string name="hint_phoneno">Enter phone number here</string>
+    <string name="hint_otp">Enter OTP here </string>
+    <string name="verifyNo_btn">Verify Number</string>
+    <string name="tv_otp">A verification Code will be sent to your Phone Number</string>
+    <string name="error_tv">OTP does not match!</string>
+    <string name="error_invalid_phoneno">Phone Number entered is Invalid!</string>
+    <string name="swipe_up">Swipe Up to Recognize a person</string>
+    <string name="swipe_down">Swipe Down to Add Contact</string>
+    <string name="tap_open_camera">Tap to Open Camera</string>
+</resources>
+

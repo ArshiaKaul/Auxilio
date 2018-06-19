@@ -1,0 +1,59 @@
+{
+  "project_info": {
+    "project_number": "313473798294",
+    "firebase_url": "https://auxilio-6a9f7.firebaseio.com",
+    "project_id": "auxilio-6a9f7",
+    "storage_bucket": "auxilio-6a9f7.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:313473798294:android:7427111ff5337ab1",
+        "android_client_info": {
+          "package_name": "com.example.pooja.auxilio"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "313473798294-smbqdau4unmfl26j8jopjfoknoo5sqi7.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.pooja.auxilio",
+            "certificate_hash": "90b642a500d00889b78bd14e839ef80b530d81c7"
+          }
+        },
+        {
+          "client_id": "313473798294-ektpmcub4gs1rkarpkm0arru3l0g0qa8.apps.googleusercontent.com",
+          "client_type": 3
+        },
+        {
+          "client_id": "313473798294-ektpmcub4gs1rkarpkm0arru3l0g0qa8.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBa5OsxKPI08QBNICDySssOPP9LSdE3OzY"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "313473798294-ektpmcub4gs1rkarpkm0arru3l0g0qa8.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
