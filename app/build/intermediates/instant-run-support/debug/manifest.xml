@@ -55,6 +55,9 @@
         <activity
             android:name="com.example.pooja.auxilio.AddContactActivity"
             android:theme="@style/Theme.AppCompat.NoActionBar" />
+        <activity
+            android:name="com.example.pooja.auxilio.RecordAudioActivity"
+            android:theme="@style/Theme.AppCompat.NoActionBar" />
 
         <meta-data
             android:name="android.support.VERSION"

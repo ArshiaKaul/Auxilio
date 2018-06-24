@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.view.WindowManager;
 import android.view.animation.Animation;
@@ -13,8 +14,11 @@ import android.widget.ImageView;
 import android.widget.Space;
 
 import  com.example.pooja.auxilio.AuthActivity ;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.PhoneAuthProvider;
-
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 
 
 public class SplashActivity extends AppCompatActivity {
@@ -28,10 +32,9 @@ public class SplashActivity extends AppCompatActivity {
         setContentView(R.layout.activity_splash);
         this.getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,WindowManager.LayoutParams.FLAG_FULLSCREEN);
 
-        final SharedPreferences sp = this.getSharedPreferences("MyPref" , Context.MODE_PRIVATE);
+        //final SharedPreferences sp = this.getSharedPreferences("MyPref" , Context.MODE_PRIVATE);
 
-        SharedPreferences uploadCounter = getSharedPreferences("MyPref2", Activity.MODE_PRIVATE);
-        int myIntValue = uploadCounter.getInt("upload_count_key", 0);
+
 
         Logo_text_app = (ImageView)findViewById(R.id.Logo_text_app);
 
@@ -51,6 +54,7 @@ public class SplashActivity extends AppCompatActivity {
                 finally {
 
 
+                    /*
                     if(sp.getBoolean("key_name", false ) ==  true){
 
                             Intent intent2 = new Intent(SplashActivity.this, GestureActivity.class);
@@ -60,9 +64,13 @@ public class SplashActivity extends AppCompatActivity {
 
                         else {
 
+                        */
                         startActivity(intent);
                         finish();
+                    /*
                     }
+
+                    */
 
                 }
             }
@@ -70,8 +78,9 @@ public class SplashActivity extends AppCompatActivity {
 
         timer.start();
 
-    }
 
+
+    }
 
 
 

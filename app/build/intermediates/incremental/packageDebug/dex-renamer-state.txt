@@ -1,7 +1,4 @@
-#Tue Jun 19 17:31:14 IST 2018
-base.0=C\:\\Users\\arshi\\Downloads\\Auxilio-20180616T182255Z-001\\Auxilio\\app\\build\\intermediates\\transforms\\dex\\debug\\folders\\1000\\10000\\instant-run-bootstrap_c29ad1fac734a4c8b5cd0d692de5bc741ea28a0c
-renamed.1=classes2.dex
+#Sun Jun 24 22:11:23 IST 2018
+base.0=C\:\\Users\\arshi\\Downloads\\Auxilio-20180624T041440Z-001\\Auxilio\\app\\build\\intermediates\\transforms\\dex\\debug\\folders\\1000\\1f\\main
 renamed.0=classes.dex
-file.1=C\:\\Users\\arshi\\Downloads\\Auxilio-20180616T182255Z-001\\Auxilio\\app\\build\\intermediates\\transforms\\dex\\debug\\folders\\1000\\10000\\instant-run_184d59fc0b27eb0dddf67bc66c63bf8534baf172\\classes.dex
-base.1=C\:\\Users\\arshi\\Downloads\\Auxilio-20180616T182255Z-001\\Auxilio\\app\\build\\intermediates\\transforms\\dex\\debug\\folders\\1000\\10000\\instant-run_184d59fc0b27eb0dddf67bc66c63bf8534baf172
-file.0=C\:\\Users\\arshi\\Downloads\\Auxilio-20180616T182255Z-001\\Auxilio\\app\\build\\intermediates\\transforms\\dex\\debug\\folders\\1000\\10000\\instant-run-bootstrap_c29ad1fac734a4c8b5cd0d692de5bc741ea28a0c\\classes.dex
+file.0=C\:\\Users\\arshi\\Downloads\\Auxilio-20180624T041440Z-001\\Auxilio\\app\\build\\intermediates\\transforms\\dex\\debug\\folders\\1000\\1f\\main\\classes.dex

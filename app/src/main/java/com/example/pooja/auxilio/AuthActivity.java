@@ -14,6 +14,7 @@ import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
@@ -24,6 +25,11 @@ import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.PhoneAuthCredential;
 import com.google.firebase.auth.PhoneAuthProvider;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
 import java.util.concurrent.TimeUnit;
 
@@ -48,17 +54,33 @@ public class AuthActivity extends AppCompatActivity {
 
     private PhoneAuthProvider.OnVerificationStateChangedCallbacks mCallbacks;
 
+    FirebaseAuth firebaseAuth = FirebaseAuth.getInstance();
+    FirebaseAuth.AuthStateListener authStateListener;
 
-
+    private DatabaseReference mRoot;
+    private DatabaseReference mUserPhoneNumber;
+    private DatabaseReference mCount;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_auth);
 
-
-
         this.getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,WindowManager.LayoutParams.FLAG_FULLSCREEN);
+
+
+        authStateListener = new FirebaseAuth.AuthStateListener() {
+            @Override
+            public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
+                FirebaseUser firebaseUser = firebaseAuth.getCurrentUser();
+                if (firebaseUser != null) {
+                    Intent intent = new Intent(AuthActivity.this, GestureActivity.class);
+                    startActivity(intent);
+                    finish();
+                }
+            }
+        };
+
 
         phone_et = (EditText)findViewById(R.id.phone_et);
         otp_et = (EditText)findViewById(R.id.otp_et);
@@ -140,23 +162,57 @@ public class AuthActivity extends AppCompatActivity {
 
     }
 
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        firebaseAuth.addAuthStateListener(authStateListener);
+    }
+
+
+
+
     private void signInWithPhoneAuthCredential(PhoneAuthCredential credential) {
         mAuth.signInWithCredential(credential)
                 .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
                     @Override
-                    public void onComplete(@NonNull Task<AuthResult> task) {
+                    public void onComplete(@NonNull final Task<AuthResult> task) {
                         if (task.isSuccessful()) {
                             // Sign in success, update UI with the signed-in user's information
+
 
                             FirebaseUser user = task.getResult().getUser();
 
                             Intent intent = new Intent(AuthActivity.this, GestureActivity.class);
+                            mRoot = FirebaseDatabase.getInstance().getReference();
+                            mUserPhoneNumber = mRoot.child(FirebaseAuth.getInstance().getCurrentUser().getPhoneNumber().toString());
+                            mUserPhoneNumber.addListenerForSingleValueEvent(new ValueEventListener() {
+                                @Override
+                                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                                    if(!dataSnapshot.exists()){
+                                        mCount = mUserPhoneNumber.child("count");
+                                        mCount.setValue(0);
+                                    }
+                                }
 
+                                @Override
+                                public void onCancelled(@NonNull DatabaseError databaseError) {
+                                    Toast.makeText(getApplicationContext(), "Could not create account", Toast.LENGTH_SHORT).show();
+                                }
+                            });
+                           // mCount = mUserPhoneNumber.child("count");
+
+                           // mCount.setValue(0);
+
+                            Toast.makeText(getApplicationContext(), "Database", Toast.LENGTH_SHORT).show();
+
+                            /*
                             SharedPreferences sharedPreferences = getApplicationContext().getSharedPreferences("MyPref" , AuthActivity.MODE_PRIVATE);
                             SharedPreferences.Editor editor = sharedPreferences.edit();
                             editor.putBoolean("key_name" , true);
                             editor.commit();
 
+                            */
                             startActivity(intent);
                             finish();
 
@@ -164,6 +220,7 @@ public class AuthActivity extends AppCompatActivity {
                         } else {
                             // Sign in failed, display a message and update the UI
                             error_tv.setVisibility(View.VISIBLE);
+                            Toast.makeText(getApplicationContext(), "OTP PROB", Toast.LENGTH_SHORT).show();
 
                             if (task.getException() instanceof FirebaseAuthInvalidCredentialsException) {
                                 // The verification code entered was invalid

@@ -12,6 +12,7 @@ import android.graphics.PorterDuff;
 import android.media.MediaRecorder;
 import android.net.Uri;
 import android.os.Environment;
+import android.os.Handler;
 import android.provider.MediaStore;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
@@ -27,6 +28,12 @@ import android.widget.Toast;
 
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.ChildEventListener;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
@@ -34,6 +41,8 @@ import com.google.firebase.storage.UploadTask;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import static android.Manifest.permission.CAMERA;
 import static android.Manifest.permission.RECORD_AUDIO;
@@ -48,8 +57,11 @@ public class AddContactActivity extends AppCompatActivity {
 
     private StorageReference storageReference;
 
-    private MediaRecorder mRecorder;
-    private  String mFileName = null;
+    private DatabaseReference mCount;
+    public int photoCounter;
+
+
+    SharedPreferences spForUploadCounter;
 
     //permission variables
     private static final int REQUEST_RECORD_AUDIO_PERMISSION = 200;
@@ -62,16 +74,30 @@ public class AddContactActivity extends AppCompatActivity {
     //another request
     public static final int RequestPermissionCode = 1;
 
-
     String uniquefilename;
 
     private static final String LOG_TAG = "Record_log";
+
+    //create instance variables for firebase API
+    //private FirebaseDatabase mFirebaseDatabase; //entry point to database
+    //private DatabaseReference uploadCounterDatabaseReference; //entry point to upload counter database
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_add_contact);
         this.getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,WindowManager.LayoutParams.FLAG_FULLSCREEN);
+
+        //initializing spForUploadCounter sharedpreference with key_name = uploadCounter
+        spForUploadCounter = getSharedPreferences("uploadCounter", 0);
+
+        //instantiating firebase objects here
+        //mFirebaseDatabase = FirebaseDatabase.getInstance();
+        //uploadCounterDatabaseReference = mFirebaseDatabase.getReference().child("uploadCounters").child(uniquefilename);
+
+        //uploadCounter mUploadCounter = new uploadCounter("0");
+        //uploadCounterDatabaseReference.push().setValue(mUploadCounter);
 
         //referencing the storage directory
         tapCameraBtn = (Button) findViewById(R.id.tapCameraBtn);
@@ -100,7 +126,7 @@ public class AddContactActivity extends AppCompatActivity {
         super.onActivityResult(requestCode, resultCode, data);
 
         if(requestCode == CAMERA_REQUEST_CODE && resultCode == RESULT_OK && data!= null){
-            Bitmap photo = (Bitmap) data.getExtras().get("data");
+            final Bitmap photo = (Bitmap) data.getExtras().get("data");
             //the tap to open camera button disappears
             tapCameraBtn.setVisibility(Button.GONE);
 
@@ -110,24 +136,62 @@ public class AddContactActivity extends AppCompatActivity {
             //and now we make the progress bar visible instead of the button
             progressBar.setVisibility(ProgressBar.VISIBLE);
 
-            //Uri uri = data.getData();
-            Uri uri = getImageUri(getApplicationContext(), photo);
-            String userId = FirebaseAuth.getInstance().getCurrentUser().getUid();
-            uniquefilename = userId.toString();
+            final Uri uri = getImageUri(getApplicationContext(), photo);
+            String userPhoneNumber = FirebaseAuth.getInstance().getCurrentUser().getPhoneNumber();
+            uniquefilename = userPhoneNumber.toString();
+
+            //using the counter from sharedPreference spForUploadCounter
+            //pooja's code
+           /* int counter_here = spForUploadCounter.getInt("uploadCounter" , 0);
+            counter_here++;*/
+
+            mCount = FirebaseDatabase.getInstance().getReference().child(FirebaseAuth.getInstance().getCurrentUser().getPhoneNumber().toString()).child("count");
+
+            mCount.addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(DataSnapshot dataSnapshot) {
+                    photoCounter = dataSnapshot.getValue(Integer.class);
+
+                    StorageReference filepath = storageReference.child("/" + uniquefilename + "/photos/" + "photo" + photoCounter);
+
+                    //uploading image captured to firebase
+                    filepath.putFile(uri).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+                        @Override
+                        public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+
+                            Toast.makeText(AddContactActivity.this, "Uploading finished!", Toast.LENGTH_LONG).show();
+
+                            Intent intent = new Intent(AddContactActivity.this, RecordAudioActivity.class);
+                            startActivity(intent);
+                            finish();
+                        }
+                    });
+                }
+
+                @Override
+                public void onCancelled(DatabaseError databaseError) {
+                    Log.d("The read failed: ", "FAILED");
+                }
+            });
 
             //creating another storage reference for filepath
-            StorageReference filepath = storageReference.child("/" + uniquefilename + "/photos/" + "photo" + userId);
+            //pooja's code
+            //Log.d("PHOTOCOUNTER: ", "COUNTER 2: " + photoCounter);
+            //String n = mCount.getRef().toString();
+            //StorageReference filepath = storageReference.child("/" + uniquefilename + "/photos/" + "photo" + photoCounter);
 
             //uploading image captured to firebase
-            filepath.putFile(uri).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+           /* filepath.putFile(uri).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
                 @Override
                 public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
 
                     Toast.makeText(AddContactActivity.this, "Uploading finished!", Toast.LENGTH_LONG).show();
-                    storeAudioToFirebase();
-                }
-            });
 
+                    Intent intent = new Intent(AddContactActivity.this, RecordAudioActivity.class);
+                    startActivity(intent);
+                    finish();
+                }
+            });*/
 
         }
 
@@ -140,106 +204,7 @@ public class AddContactActivity extends AppCompatActivity {
         return Uri.parse(path);
     }
 
-    private void storeAudioToFirebase(){
 
-
-        progressBar.setVisibility(ProgressBar.GONE);
-        tapCameraBtn.setVisibility(Button.VISIBLE);
-        tapCameraBtn.setEnabled(true);
-        tapCameraBtn.setText("Tap To Record Audio");
-
-        mFileName = Environment.getExternalStorageDirectory().getAbsolutePath();
-        mFileName += "/recorded_audio.mp3";
-
-        tapCameraBtn.setOnTouchListener(new View.OnTouchListener() {
-
-            @Override
-            public boolean onTouch(View v, MotionEvent event) {
-
-                if(event.getAction() == MotionEvent.ACTION_DOWN){
-                    startRecording();
-                    Toast.makeText(AddContactActivity.this, "Recording started!", Toast.LENGTH_SHORT).show();
-                }
-                else if(event.getAction() == MotionEvent.ACTION_UP){
-                    Toast.makeText(AddContactActivity.this, "Recording stopped!", Toast.LENGTH_SHORT).show();
-                    stopRecording();
-                }
-                else{
-
-                    storeAudioToFirebase();
-                }
-                return false;
-            }
-        });
-
-
-    }
-
-
-    private void startRecording() {
-
-        mRecorder = new MediaRecorder();
-
-        mRecorder.setAudioSource(MediaRecorder.AudioSource.MIC);
-
-        mRecorder.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP);
-
-        mRecorder.setOutputFile(mFileName);
-
-        mRecorder.setAudioEncoder(MediaRecorder.AudioEncoder.AMR_NB);
-
-        try {
-            mRecorder.prepare();
-        } catch (IOException e) {
-            Log.e(LOG_TAG, "prepare() failed");
-        }
-
-        mRecorder.start();
-    }
-
-    private void stopRecording() {
-        mRecorder.stop();
-
-        tapCameraBtn.setVisibility(Button.VISIBLE);
-        tapCameraBtn.setEnabled(false);
-        tapCameraBtn.setText("");
-
-        //the tap to open camera button disappears
-        tapCameraBtn.setVisibility(Button.GONE);
-
-        //and now we make the progress bar visible instead of the button
-        progressBar.setVisibility(ProgressBar.VISIBLE);
-
-        mRecorder.release();
-        mRecorder = null;
-        Toast.makeText(this, "Uploading Audio...", Toast.LENGTH_SHORT).show();
-
-        uploadAudio();
-    }
-
-    private void uploadAudio(){
-
-        String userId = FirebaseAuth.getInstance().getCurrentUser().getUid();
-        uniquefilename = userId.toString();
-        StorageReference filepath = storageReference.child( "/" + uniquefilename + "/audios/" + "audio" + userId);
-
-        Uri uri = Uri.fromFile(new File(mFileName));
-        filepath.putFile(uri).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
-
-            @Override
-            public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
-
-                Toast.makeText(AddContactActivity.this, "Audio Uploaded!", Toast.LENGTH_SHORT).show();
-
-                Intent intent = new Intent(AddContactActivity.this, GestureActivity.class);
-                startActivity(intent);
-                finish();
-
-
-            }
-        });
-
-    }
 
     private void requestPermission() {
         ActivityCompat.requestPermissions(AddContactActivity.this, new

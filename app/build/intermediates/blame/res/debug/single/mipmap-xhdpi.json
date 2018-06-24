@@ -1,18 +1,10 @@
 [
     {
-        "merged": "C:\\Users\\pooja\\AndroidStudioProjects\\Auxilio\\app\\build\\intermediates\\res\\merged\\debug\\mipmap-xhdpi\\ic_launcher_round.png",
-        "source": "C:\\Users\\pooja\\AndroidStudioProjects\\Auxilio\\app\\src\\main\\res\\mipmap-xhdpi\\ic_launcher_round.png"
+        "merged": "C:\\Users\\arshi\\Downloads\\Auxilio-20180624T041440Z-001\\Auxilio\\app\\build\\intermediates\\res\\merged\\debug\\mipmap-xhdpi\\ic_launcher.png",
+        "source": "C:\\Users\\arshi\\Downloads\\Auxilio-20180624T041440Z-001\\Auxilio\\app\\src\\main\\res\\mipmap-xhdpi\\ic_launcher.png"
     },
     {
-        "merged": "C:\\Users\\arshi\\Downloads\\Auxilio-20180616T182255Z-001\\Auxilio\\app\\build\\intermediates\\res\\merged\\debug\\mipmap-xhdpi\\ic_launcher_round.png",
-        "source": "C:\\Users\\arshi\\Downloads\\Auxilio-20180616T182255Z-001\\Auxilio\\app\\src\\main\\res\\mipmap-xhdpi\\ic_launcher_round.png"
-    },
-    {
-        "merged": "C:\\Users\\arshi\\Downloads\\Auxilio-20180616T182255Z-001\\Auxilio\\app\\build\\intermediates\\res\\merged\\debug\\mipmap-xhdpi\\ic_launcher.png",
-        "source": "C:\\Users\\arshi\\Downloads\\Auxilio-20180616T182255Z-001\\Auxilio\\app\\src\\main\\res\\mipmap-xhdpi\\ic_launcher.png"
-    },
-    {
-        "merged": "C:\\Users\\pooja\\AndroidStudioProjects\\Auxilio\\app\\build\\intermediates\\res\\merged\\debug\\mipmap-xhdpi\\ic_launcher.png",
-        "source": "C:\\Users\\pooja\\AndroidStudioProjects\\Auxilio\\app\\src\\main\\res\\mipmap-xhdpi\\ic_launcher.png"
+        "merged": "C:\\Users\\arshi\\Downloads\\Auxilio-20180624T041440Z-001\\Auxilio\\app\\build\\intermediates\\res\\merged\\debug\\mipmap-xhdpi\\ic_launcher_round.png",
+        "source": "C:\\Users\\arshi\\Downloads\\Auxilio-20180624T041440Z-001\\Auxilio\\app\\src\\main\\res\\mipmap-xhdpi\\ic_launcher_round.png"
     }
 ]
