@@ -30,6 +30,8 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.kairos.Kairos;
+import com.kairos.KairosListener;
 
 import java.util.concurrent.TimeUnit;
 
@@ -37,6 +39,12 @@ import java.util.concurrent.TimeUnit;
 
 public class AuthActivity extends AppCompatActivity {
 
+    // instantiate a new kairos instance
+    Kairos myKairos = new Kairos();
+
+    // set authentication
+    String app_id = "b44ea952";
+    String api_key = "9d5cec3afba947522606cbfa90defd5c";
 
     private EditText phone_et;
     private EditText otp_et;
@@ -67,7 +75,26 @@ public class AuthActivity extends AppCompatActivity {
         setContentView(R.layout.activity_auth);
 
         this.getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,WindowManager.LayoutParams.FLAG_FULLSCREEN);
+        // Create an instance of the KairosListener
+        KairosListener listener = new KairosListener() {
 
+            @Override
+            public void onSuccess(String response) {
+                // your code here!
+                Log.d("SUCCESSFUL ENROLL", response);
+                Toast.makeText(getApplicationContext(), "SUCCESSFUL ENROLL", Toast.LENGTH_SHORT).show();
+            }
+
+            @Override
+            public void onFail(String response) {
+                // your code here!
+                Log.d("ENROLL FAILURE", response);
+                Toast.makeText(getApplicationContext(), "ENROLL FAILURE", Toast.LENGTH_SHORT).show();
+            }
+        };
+
+
+        myKairos.setAuthentication(this, app_id, api_key);
 
         authStateListener = new FirebaseAuth.AuthStateListener() {
             @Override

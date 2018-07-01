@@ -15,6 +15,7 @@ import android.net.Uri;
 import android.os.Environment;
 import android.os.Handler;
 import android.provider.MediaStore;
+import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
@@ -27,7 +28,11 @@ import android.widget.Button;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
+import com.google.android.gms.common.api.Api;
+import com.google.android.gms.common.api.internal.TaskApiCall;
+import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
@@ -42,6 +47,7 @@ import com.google.firebase.storage.UploadTask;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -49,6 +55,10 @@ import static android.Manifest.permission.CAMERA;
 import static android.Manifest.permission.RECORD_AUDIO;
 import static android.Manifest.permission.WRITE_EXTERNAL_STORAGE;
 import static java.security.AccessController.getContext;
+
+import com.kairos.*;
+
+import org.json.JSONException;
 
 public class AddContactActivity extends AppCompatActivity {
 
@@ -60,6 +70,8 @@ public class AddContactActivity extends AppCompatActivity {
 
     private DatabaseReference mCount;
     public int photoCounter;
+
+    private Kairos myKairos = new Kairos();
 
     MediaPlayer mediaPlayer = null;
 
@@ -148,7 +160,7 @@ public class AddContactActivity extends AppCompatActivity {
             progressBar.setVisibility(ProgressBar.VISIBLE);
 
             final Uri uri = getImageUri(getApplicationContext(), photo);
-            String userPhoneNumber = FirebaseAuth.getInstance().getCurrentUser().getPhoneNumber();
+            final String userPhoneNumber = FirebaseAuth.getInstance().getCurrentUser().getPhoneNumber();
             uniquefilename = userPhoneNumber.toString();
 
             //using the counter from sharedPreference spForUploadCounter
@@ -163,7 +175,25 @@ public class AddContactActivity extends AppCompatActivity {
                 public void onDataChange(DataSnapshot dataSnapshot) {
                     photoCounter = dataSnapshot.getValue(Integer.class);
 
-                    StorageReference filepath = storageReference.child("/" + uniquefilename + "/photos/" + "photo_" + photoCounter);
+                    final StorageReference filepath = storageReference.child("/" + uniquefilename + "/photos/" + "photo_" + photoCounter);
+
+                    // Create an instance of the KairosListener
+                    KairosListener listener = new KairosListener() {
+
+                        @Override
+                        public void onSuccess(String response) {
+                            // your code here!
+                            Log.d("SUCCESSFUL ENROLL", response);
+                            Toast.makeText(getApplicationContext(), "SUCCESSFUL ENROLL", Toast.LENGTH_SHORT).show();
+                        }
+
+                        @Override
+                        public void onFail(String response) {
+                            // your code here!
+                            Log.d("ENROLL FAILURE", response);
+                            Toast.makeText(getApplicationContext(), "ENROLL FAILURE", Toast.LENGTH_SHORT).show();
+                        }
+                    };
 
                     //uploading image captured to firebase
                     filepath.putFile(uri).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
@@ -172,6 +202,55 @@ public class AddContactActivity extends AppCompatActivity {
 
                             mediaPlayer.stop();
                             mediaPlayer.release();
+
+                            filepath.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
+                                @Override
+                                public void onSuccess(Uri uri) {
+                                    Toast.makeText(getApplicationContext(), uri.toString(), Toast.LENGTH_SHORT).show();
+
+                                    // Create an instance of the KairosListener
+                                    KairosListener listener = new KairosListener() {
+
+                                        @Override
+                                        public void onSuccess(String response) {
+                                            // your code here!
+                                            Log.d("SUCCESSFUL KAIROS", response);
+                                            Toast.makeText(getApplicationContext(), "Uploaded to Kairos", Toast.LENGTH_SHORT).show();
+                                        }
+
+                                        @Override
+                                        public void onFail(String response) {
+                                            // your code here!
+                                            Log.d("ERROR KAIROS", response);
+                                            Toast.makeText(getApplicationContext(), "Kairos Upload ERROR", Toast.LENGTH_SHORT).show();
+                                        }
+                                    };
+
+                                    try {
+                                        Kairos myKairos = new Kairos();
+                                        // set authentication
+                                        String app_id = "b44ea952";
+                                        String api_key = "9d5cec3afba947522606cbfa90defd5c";
+                                        myKairos.setAuthentication(getApplicationContext(), app_id, api_key);
+                                        String image = uri.toString();
+                                        String subjectId = "photo_" + photoCounter;
+                                        String galleryId = userPhoneNumber;
+                                        myKairos.enroll(image, subjectId, galleryId, null, null, null, listener);
+
+                                    } catch (JSONException e) {
+                                        e.printStackTrace();
+                                    } catch (UnsupportedEncodingException e) {
+                                        e.printStackTrace();
+                                    }
+
+                                }
+                            }).addOnFailureListener(new OnFailureListener() {
+                                @Override
+                                public void onFailure(@NonNull Exception exception) {
+                                    // Handle any errors
+                                    Toast.makeText(getApplicationContext(), "URI not found", Toast.LENGTH_SHORT).show();
+                                }
+                            });
 
                             Toast.makeText(AddContactActivity.this, "Uploading finished!", Toast.LENGTH_LONG).show();
 

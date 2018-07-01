@@ -2,22 +2,13 @@
 <items version="2" >
 
     <item
-        is-multidex="true"
-        jar="C:\Users\arshi\Downloads\Auxilio-20180624T041440Z-001\Auxilio\app\build\intermediates\incremental-runtime-classes\debug\instant-run.jar"
-        jumboMode="true"
+        is-multidex="false"
+        jar="C:\Users\arshi\Downloads\Auxilio-20180624T041440Z-001\Auxilio\app\libs\KairosSDK.jar"
+        jumboMode="false"
         optimize="true"
         revision="26.0.0"
-        sha1="caff8e51a24901cfc9cd7e1cf83d84f4cb0c103b">
-        <dex dex="C:\Users\arshi\Downloads\Auxilio-20180624T041440Z-001\Auxilio\app\build\intermediates\transforms\dex\debug\folders\1000\10000\instant-run_8f89f7a2052da1a73a00bcea79cc0ed783a3408b\classes.dex" />
-    </item>
-    <item
-        is-multidex="true"
-        jar="C:\Users\arshi\Downloads\Auxilio-20180624T041440Z-001\Auxilio\app\build\intermediates\incremental-classes\debug\instant-run-bootstrap.jar"
-        jumboMode="true"
-        optimize="true"
-        revision="26.0.0"
-        sha1="545e1bfa6fe66b8da3f6afc0affaad1e98c7197a">
-        <dex dex="C:\Users\arshi\Downloads\Auxilio-20180624T041440Z-001\Auxilio\app\build\intermediates\transforms\dex\debug\folders\1000\10000\instant-run-bootstrap_849e4e535d4f4c8e82b69ebc6f40fa6a846e2290\classes.dex" />
+        sha1="b465e07a1b27a1e24f7f086c10bcd4646898df42">
+        <dex dex="C:\Users\arshi\Downloads\Auxilio-20180624T041440Z-001\Auxilio\app\build\intermediates\pre-dexed\debug\KairosSDK_c7e21eb38fd856afc0061dbce3a27dea0e964e7b.jar" />
     </item>
 
 </items>
