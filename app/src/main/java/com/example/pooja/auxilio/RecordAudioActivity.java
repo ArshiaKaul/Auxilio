@@ -3,6 +3,7 @@ package com.example.pooja.auxilio;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.PorterDuff;
+import android.media.MediaPlayer;
 import android.media.MediaRecorder;
 import android.net.Uri;
 import android.os.Environment;
@@ -16,7 +17,9 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.ProgressBar;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -42,6 +45,8 @@ public class RecordAudioActivity extends AppCompatActivity {
 
     private Button tapToRecordBtn;
     private ProgressBar record_progressBar;
+    private ImageView checkSign;
+    private TextView goToHomescreen;
 
     private MediaRecorder mRecorder;
     private  String mFileName = null;
@@ -52,6 +57,7 @@ public class RecordAudioActivity extends AppCompatActivity {
     private DatabaseReference mCount;
     public int audioCounter;
 
+    private MediaPlayer mediaPlayer = null;
 
 
     String uniquefilename;
@@ -70,13 +76,44 @@ public class RecordAudioActivity extends AppCompatActivity {
 
         this.getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,WindowManager.LayoutParams.FLAG_FULLSCREEN);
 
+        mediaPlayer = MediaPlayer.create(getApplicationContext(), R.raw.tapandholdtorecord);
+        mediaPlayer.start();
+
         storageReference = FirebaseStorage.getInstance().getReference();
 
 
         tapToRecordBtn = (Button)findViewById(R.id.tapToRecordBtn);
         record_progressBar = (ProgressBar)findViewById(R.id.record_progressBar);
+        checkSign = (ImageView)findViewById(R.id.check_sign);
+        goToHomescreen = (TextView)findViewById(R.id.goto_homescreen);
+        checkSign.setVisibility(View.GONE);
+        goToHomescreen.setVisibility(View.GONE);
 
         record_progressBar.getIndeterminateDrawable().setColorFilter(ContextCompat.getColor(this, android.R.color.white), PorterDuff.Mode.SRC_IN );
+
+
+        checkSign.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mediaPlayer.stop();
+                mediaPlayer.release();
+                Intent intent = new Intent(RecordAudioActivity.this, GestureActivity.class);
+                startActivity(intent);
+                finish();
+            }
+        });
+
+        goToHomescreen.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mediaPlayer.stop();
+                mediaPlayer.release();
+                Intent intent = new Intent(RecordAudioActivity.this, GestureActivity.class);
+                startActivity(intent);
+                finish();
+            }
+        });
+
 
         storeAudioToFirebase();
 
@@ -95,6 +132,8 @@ public class RecordAudioActivity extends AppCompatActivity {
 
             @Override
             public boolean onTouch(View v, MotionEvent event) {
+
+                mediaPlayer.stop();
 
                 if(event.getAction() == MotionEvent.ACTION_DOWN){
 
@@ -166,6 +205,9 @@ public class RecordAudioActivity extends AppCompatActivity {
                 mRecorder.release();
                 mRecorder = null;
 
+                mediaPlayer = MediaPlayer.create(getApplicationContext(), R.raw.waitwhilerecisuploaded);
+                mediaPlayer.start();
+
                 Toast.makeText(this, "Uploading Audio...", Toast.LENGTH_SHORT).show();
                 uploadAudio();
 
@@ -203,23 +245,26 @@ public class RecordAudioActivity extends AppCompatActivity {
             public void onDataChange(DataSnapshot dataSnapshot) {
                 audioCounter = dataSnapshot.getValue(Integer.class);
 
-                StorageReference filepath = storageReference.child( "/" + uniquefilename + "/audios/" + "audio" + audioCounter);
+                StorageReference filepath = storageReference.child( "/" + uniquefilename + "/audios/" + "audio_" + audioCounter);
 
                 filepath.putFile(uri).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
 
                     @Override
                     public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
-
+                        mediaPlayer.stop();
+                        record_progressBar.setVisibility(ProgressBar.GONE);
+                        checkSign.setVisibility(View.VISIBLE);
+                        goToHomescreen.setVisibility(View.VISIBLE);
                         Toast.makeText(RecordAudioActivity.this, "Audio Uploaded!", Toast.LENGTH_SHORT).show();
 
-                        SharedPreferences.Editor editor = spForUploadCounter.edit();
+                      /*  SharedPreferences.Editor editor = spForUploadCounter.edit();
                         editor.putInt("uploadCounter" , counter);
-                        editor.commit();
+                        editor.commit();*/
 
-                        Intent intent = new Intent(RecordAudioActivity.this, GestureActivity.class);
-                        startActivity(intent);
-                        finish();
-
+                        if(!mediaPlayer.isPlaying()){
+                            mediaPlayer = MediaPlayer.create(getApplicationContext(), R.raw.taptogotohomescreen);
+                            mediaPlayer.start();
+                        }
 
                     }
                 });
@@ -234,6 +279,13 @@ public class RecordAudioActivity extends AppCompatActivity {
             }
         });
 
+    }
+
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+        mediaPlayer.stop();
+        mediaPlayer.release();
     }
 
 

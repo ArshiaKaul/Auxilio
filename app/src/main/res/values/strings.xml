@@ -10,6 +10,8 @@
     <string name="swipe_up">Swipe Up to Recognize a person</string>
     <string name="swipe_down">Swipe Down to Add Contact</string>
     <string name="tap_open_camera">Tap to Open Camera</string>
-    <string name="audio_record">Hold to Record, Release to save!</string>
+    <string name="audio_record">Tap and Hold to Record, Release to save</string>
+    <string name="go_to_homescreen">Tap to go to Homescreen</string>
+
 </resources>
 

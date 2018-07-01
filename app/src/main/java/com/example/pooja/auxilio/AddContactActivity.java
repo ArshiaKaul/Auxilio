@@ -9,6 +9,7 @@ import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.PorterDuff;
+import android.media.MediaPlayer;
 import android.media.MediaRecorder;
 import android.net.Uri;
 import android.os.Environment;
@@ -60,6 +61,8 @@ public class AddContactActivity extends AppCompatActivity {
     private DatabaseReference mCount;
     public int photoCounter;
 
+    MediaPlayer mediaPlayer = null;
+
 
     SharedPreferences spForUploadCounter;
 
@@ -89,6 +92,9 @@ public class AddContactActivity extends AppCompatActivity {
         setContentView(R.layout.activity_add_contact);
         this.getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,WindowManager.LayoutParams.FLAG_FULLSCREEN);
 
+        mediaPlayer = MediaPlayer.create(getApplicationContext(), R.raw.taptoopencamera);
+        mediaPlayer.start();
+
         //initializing spForUploadCounter sharedpreference with key_name = uploadCounter
         spForUploadCounter = getSharedPreferences("uploadCounter", 0);
 
@@ -110,6 +116,8 @@ public class AddContactActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
 
+                mediaPlayer.stop();
+
                 if(!checkPermission()){
                     requestPermission();
                 }else{
@@ -126,6 +134,9 @@ public class AddContactActivity extends AppCompatActivity {
         super.onActivityResult(requestCode, resultCode, data);
 
         if(requestCode == CAMERA_REQUEST_CODE && resultCode == RESULT_OK && data!= null){
+            mediaPlayer = MediaPlayer.create(getApplicationContext(), R.raw.waitwhilepicisuploaded);
+            mediaPlayer.start();
+
             final Bitmap photo = (Bitmap) data.getExtras().get("data");
             //the tap to open camera button disappears
             tapCameraBtn.setVisibility(Button.GONE);
@@ -152,12 +163,15 @@ public class AddContactActivity extends AppCompatActivity {
                 public void onDataChange(DataSnapshot dataSnapshot) {
                     photoCounter = dataSnapshot.getValue(Integer.class);
 
-                    StorageReference filepath = storageReference.child("/" + uniquefilename + "/photos/" + "photo" + photoCounter);
+                    StorageReference filepath = storageReference.child("/" + uniquefilename + "/photos/" + "photo_" + photoCounter);
 
                     //uploading image captured to firebase
                     filepath.putFile(uri).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
                         @Override
                         public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+
+                            mediaPlayer.stop();
+                            mediaPlayer.release();
 
                             Toast.makeText(AddContactActivity.this, "Uploading finished!", Toast.LENGTH_LONG).show();
 
@@ -218,5 +232,12 @@ public class AddContactActivity extends AppCompatActivity {
                 RECORD_AUDIO);
         return result == PackageManager.PERMISSION_GRANTED &&
                 result1 == PackageManager.PERMISSION_GRANTED;
+    }
+
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+        mediaPlayer.stop();
+        mediaPlayer.release();
     }
 }

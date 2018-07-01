@@ -1,6 +1,7 @@
 package com.example.pooja.auxilio;
 
 import android.content.Intent;
+import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.view.GestureDetectorCompat;
@@ -28,6 +29,7 @@ public class GestureActivity extends AppCompatActivity {
 
     private TextView justExampletextView ;
     private GestureDetectorCompat mDetector;
+    private MediaPlayer mediaPlayer = null;
 
 
     FirebaseAuth firebaseAuth = FirebaseAuth.getInstance();
@@ -51,6 +53,9 @@ public class GestureActivity extends AppCompatActivity {
         };
 
         this.getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,WindowManager.LayoutParams.FLAG_FULLSCREEN);
+
+        mediaPlayer = MediaPlayer.create(getApplicationContext(), R.raw.swipeupdown);
+        mediaPlayer.start();
 
 
         mDetector = new GestureDetectorCompat(this, new MyGestureListener());
@@ -78,6 +83,8 @@ public class GestureActivity extends AppCompatActivity {
 
         @Override
         public boolean onDown(MotionEvent event) {
+            mediaPlayer.stop();
+            mediaPlayer.release();
             Log.d(DEBUG_TAG,"onDown: " + event.toString());
             return true;
         }
@@ -136,6 +143,7 @@ public class GestureActivity extends AppCompatActivity {
 
         // Start the new activity.
         startActivity(randomIntent);
+        finish();
     }
 
     public void randomMethird(){
@@ -146,5 +154,13 @@ public class GestureActivity extends AppCompatActivity {
         // Start the new activity.
         startActivity(randomIntent);
         Log.d("AddContactActivity", "INTENT part 2");
+        finish();
+    }
+
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+        mediaPlayer.stop();
+        mediaPlayer.release();
     }
 }
