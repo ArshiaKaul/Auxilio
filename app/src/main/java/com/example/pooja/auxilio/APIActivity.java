@@ -9,6 +9,8 @@ import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.PorterDuff;
+import android.media.AudioAttributes;
+import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.media.MediaRecorder;
 import android.net.Uri;
@@ -310,14 +312,14 @@ public class APIActivity extends AppCompatActivity {
                     String photoNum = name.split("_")[1];
 
                     storageReference = FirebaseStorage.getInstance().getReference()
-                            .child(FirebaseAuth.getInstance().getCurrentUser().getPhoneNumber().toString()).child("audio").child("audio_" + photoNum);
+                            .child(FirebaseAuth.getInstance().getCurrentUser().getPhoneNumber().toString()).child("audios").child("audio_" + photoNum);
 
                     Toast.makeText(APIActivity.this, "audio_" + photoNum + ".3gpp", Toast.LENGTH_SHORT).show();
 
                     storageReference.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
                         @Override
                         public void onSuccess(Uri audioUri) {
-                            try{
+                            /*try{
                                 mediaPlayer.setDataSource(getApplicationContext(), audioUri);
                                 mediaPlayer.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
                                     @Override
@@ -327,7 +329,17 @@ public class APIActivity extends AppCompatActivity {
                                 });
                             }catch(IOException e){
                                 Toast.makeText(APIActivity.this, "Cannot play audio", Toast.LENGTH_SHORT).show();
+                            }*/
+                            //String url = "https://firebasestorage.googleapis.com/v0/b/auxilio-6a9f7.appspot.com/o/%2B918383009353%2Faudios%2Faudio_0?alt=media&token=b1c3dbab-0c73-4179-96dd-52ad519daf13"; // your URL here
+                            try{
+                                MediaPlayer mediaPlayer = new MediaPlayer();
+                                mediaPlayer.setDataSource(audioUri.toString());
+                                mediaPlayer.prepare(); // might take long! (for buffering, etc)
+                                mediaPlayer.start();
+                            }catch (IOException e){
+                                e.printStackTrace();
                             }
+
                         }
                     }).addOnFailureListener(new OnFailureListener() {
                         @Override
