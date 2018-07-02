@@ -79,24 +79,14 @@ public class AddContactActivity extends AppCompatActivity {
     SharedPreferences spForUploadCounter;
 
     //permission variables
-    private static final int REQUEST_RECORD_AUDIO_PERMISSION = 200;
     private String [] permissions = {android.Manifest.permission.RECORD_AUDIO, android.Manifest.permission.CAMERA, android.Manifest.permission.WRITE_EXTERNAL_STORAGE};
 
-
-    //camera request (used in dispatchPictureIntent)
-    static final int REQUEST_TAKE_PHOTO = 1;
-    static final int REQUEST_IMAGE_CAPTURE = 1;
     //another request
     public static final int RequestPermissionCode = 1;
 
     String uniquefilename;
 
     private static final String LOG_TAG = "Record_log";
-
-    //create instance variables for firebase API
-    //private FirebaseDatabase mFirebaseDatabase; //entry point to database
-    //private DatabaseReference uploadCounterDatabaseReference; //entry point to upload counter database
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -109,13 +99,6 @@ public class AddContactActivity extends AppCompatActivity {
 
         //initializing spForUploadCounter sharedpreference with key_name = uploadCounter
         spForUploadCounter = getSharedPreferences("uploadCounter", 0);
-
-        //instantiating firebase objects here
-        //mFirebaseDatabase = FirebaseDatabase.getInstance();
-        //uploadCounterDatabaseReference = mFirebaseDatabase.getReference().child("uploadCounters").child(uniquefilename);
-
-        //uploadCounter mUploadCounter = new uploadCounter("0");
-        //uploadCounterDatabaseReference.push().setValue(mUploadCounter);
 
         //referencing the storage directory
         tapCameraBtn = (Button) findViewById(R.id.tapCameraBtn);
@@ -159,135 +142,111 @@ public class AddContactActivity extends AppCompatActivity {
             //and now we make the progress bar visible instead of the button
             progressBar.setVisibility(ProgressBar.VISIBLE);
 
-            final Uri uri = getImageUri(getApplicationContext(), photo);
-            final String userPhoneNumber = FirebaseAuth.getInstance().getCurrentUser().getPhoneNumber();
-            uniquefilename = userPhoneNumber.toString();
-
-            //using the counter from sharedPreference spForUploadCounter
-            //pooja's code
-           /* int counter_here = spForUploadCounter.getInt("uploadCounter" , 0);
-            counter_here++;*/
-
             mCount = FirebaseDatabase.getInstance().getReference().child(FirebaseAuth.getInstance().getCurrentUser().getPhoneNumber().toString()).child("count");
 
-            mCount.addListenerForSingleValueEvent(new ValueEventListener() {
-                @Override
-                public void onDataChange(DataSnapshot dataSnapshot) {
-                    photoCounter = dataSnapshot.getValue(Integer.class);
-
-                    final StorageReference filepath = storageReference.child("/" + uniquefilename + "/photos/" + "photo_" + photoCounter);
-
-                    // Create an instance of the KairosListener
-                    KairosListener listener = new KairosListener() {
-
-                        @Override
-                        public void onSuccess(String response) {
-                            // your code here!
-                            Log.d("SUCCESSFUL ENROLL", response);
-                            Toast.makeText(getApplicationContext(), "SUCCESSFUL ENROLL", Toast.LENGTH_SHORT).show();
-                        }
-
-                        @Override
-                        public void onFail(String response) {
-                            // your code here!
-                            Log.d("ENROLL FAILURE", response);
-                            Toast.makeText(getApplicationContext(), "ENROLL FAILURE", Toast.LENGTH_SHORT).show();
-                        }
-                    };
-
-                    //uploading image captured to firebase
-                    filepath.putFile(uri).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
-                        @Override
-                        public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
-
-                            mediaPlayer.stop();
-                            mediaPlayer.release();
-
-                            filepath.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
-                                @Override
-                                public void onSuccess(Uri uri) {
-                                    Toast.makeText(getApplicationContext(), uri.toString(), Toast.LENGTH_SHORT).show();
-
-                                    // Create an instance of the KairosListener
-                                    KairosListener listener = new KairosListener() {
-
-                                        @Override
-                                        public void onSuccess(String response) {
-                                            // your code here!
-                                            Log.d("SUCCESSFUL KAIROS", response);
-                                            Toast.makeText(getApplicationContext(), "Uploaded to Kairos", Toast.LENGTH_SHORT).show();
-                                        }
-
-                                        @Override
-                                        public void onFail(String response) {
-                                            // your code here!
-                                            Log.d("ERROR KAIROS", response);
-                                            Toast.makeText(getApplicationContext(), "Kairos Upload ERROR", Toast.LENGTH_SHORT).show();
-                                        }
-                                    };
-
-                                    try {
-                                        Kairos myKairos = new Kairos();
-                                        // set authentication
-                                        String app_id = "b44ea952";
-                                        String api_key = "9d5cec3afba947522606cbfa90defd5c";
-                                        myKairos.setAuthentication(getApplicationContext(), app_id, api_key);
-                                        String image = uri.toString();
-                                        String subjectId = "photo_" + photoCounter;
-                                        String galleryId = userPhoneNumber;
-                                        myKairos.enroll(image, subjectId, galleryId, null, null, null, listener);
-
-                                    } catch (JSONException e) {
-                                        e.printStackTrace();
-                                    } catch (UnsupportedEncodingException e) {
-                                        e.printStackTrace();
-                                    }
-
-                                }
-                            }).addOnFailureListener(new OnFailureListener() {
-                                @Override
-                                public void onFailure(@NonNull Exception exception) {
-                                    // Handle any errors
-                                    Toast.makeText(getApplicationContext(), "URI not found", Toast.LENGTH_SHORT).show();
-                                }
-                            });
-
-                            Toast.makeText(AddContactActivity.this, "Uploading finished!", Toast.LENGTH_LONG).show();
-
-                            Intent intent = new Intent(AddContactActivity.this, RecordAudioActivity.class);
-                            startActivity(intent);
-                            finish();
-                        }
-                    });
-                }
-
-                @Override
-                public void onCancelled(DatabaseError databaseError) {
-                    Log.d("The read failed: ", "FAILED");
-                }
-            });
-
-            //creating another storage reference for filepath
-            //pooja's code
-            //Log.d("PHOTOCOUNTER: ", "COUNTER 2: " + photoCounter);
-            //String n = mCount.getRef().toString();
-            //StorageReference filepath = storageReference.child("/" + uniquefilename + "/photos/" + "photo" + photoCounter);
-
-            //uploading image captured to firebase
-           /* filepath.putFile(uri).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
-                @Override
-                public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
-
-                    Toast.makeText(AddContactActivity.this, "Uploading finished!", Toast.LENGTH_LONG).show();
-
-                    Intent intent = new Intent(AddContactActivity.this, RecordAudioActivity.class);
-                    startActivity(intent);
-                    finish();
-                }
-            });*/
-
+            uploadPhoto(mCount, photo);
         }
 
+    }
+
+    public void uploadPhoto(DatabaseReference mCount, Bitmap photo){
+
+        final Uri uri = getImageUri(getApplicationContext(), photo);
+        final String userPhoneNumber = FirebaseAuth.getInstance().getCurrentUser().getPhoneNumber();
+        uniquefilename = userPhoneNumber.toString();
+
+        mCount.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                photoCounter = dataSnapshot.getValue(Integer.class);
+
+                //uploading image captured to firebase
+                uploadPhotoToFirebase(uri, userPhoneNumber, uniquefilename, photoCounter);
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+                Log.d("The read failed: ", "FAILED");
+            }
+        });
+    }
+
+    public void uploadPhotoToFirebase(Uri uri, final String userPhoneNumber, String uniquefilename, int photoCounter){
+
+        final StorageReference filepath = storageReference.child("/" + uniquefilename + "/photos/" + "photo_" + photoCounter);
+
+        filepath.putFile(uri).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+            @Override
+            public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+
+                mediaPlayer.stop();
+                mediaPlayer.release();
+
+                filepath.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
+                    @Override
+                    public void onSuccess(Uri uri) {
+
+                        Toast.makeText(getApplicationContext(), uri.toString(), Toast.LENGTH_SHORT).show();
+                        uploadPhotoToKairos(uri,userPhoneNumber);
+
+                    }
+                }).addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception exception) {
+                        // Handle any errors
+                        Toast.makeText(getApplicationContext(), "URI not found", Toast.LENGTH_SHORT).show();
+                    }
+                });
+
+                Toast.makeText(AddContactActivity.this, "Uploading finished!", Toast.LENGTH_LONG).show();
+
+                Intent intent = new Intent(AddContactActivity.this, RecordAudioActivity.class);
+                startActivity(intent);
+                finish();
+            }
+        });
+    }
+
+    public void uploadPhotoToKairos(Uri uri, String userPhoneNumber){
+        // Create an instance of the KairosListener
+        KairosListener listener = createKairosListener();
+
+        try {
+            Kairos myKairos = new Kairos();
+            // set authentication
+            String app_id = "b44ea952";
+            String api_key = "9d5cec3afba947522606cbfa90defd5c";
+            myKairos.setAuthentication(getApplicationContext(), app_id, api_key);
+            String image = uri.toString();
+            String subjectId = "photo_" + photoCounter;
+            String galleryId = userPhoneNumber;
+            myKairos.enroll(image, subjectId, galleryId, null, null, null, listener);
+
+        } catch (JSONException e) {
+            e.printStackTrace();
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
+
+    }
+
+    public KairosListener createKairosListener(){
+        return new KairosListener() {
+
+            @Override
+            public void onSuccess(String response) {
+                // your code here!
+                Log.d("SUCCESSFUL KAIROS", response);
+                Toast.makeText(getApplicationContext(), "Uploaded to Kairos", Toast.LENGTH_SHORT).show();
+            }
+
+            @Override
+            public void onFail(String response) {
+                // your code here!
+                Log.d("ERROR KAIROS", response);
+                Toast.makeText(getApplicationContext(), "Kairos Upload ERROR", Toast.LENGTH_SHORT).show();
+            }
+        };
     }
 
     public Uri getImageUri(Context inContext, Bitmap inImage) {
@@ -296,8 +255,6 @@ public class AddContactActivity extends AppCompatActivity {
         String path = MediaStore.Images.Media.insertImage(inContext.getContentResolver(), inImage, "Title", null);
         return Uri.parse(path);
     }
-
-
 
     private void requestPermission() {
         ActivityCompat.requestPermissions(AddContactActivity.this, new

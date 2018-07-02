@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="default_web_client_id" translatable="false">313473798294-ektpmcub4gs1rkarpkm0arru3l0g0qa8.apps.googleusercontent.com</string>
+    <string name="firebase_database_url" translatable="false">https://auxilio-6a9f7.firebaseio.com</string>
+    <string name="gcm_defaultSenderId" translatable="false">313473798294</string>
+    <string name="google_api_key" translatable="false">AIzaSyBa5OsxKPI08QBNICDySssOPP9LSdE3OzY</string>
+    <string name="google_app_id" translatable="false">1:313473798294:android:7427111ff5337ab1</string>
+    <string name="google_crash_reporting_api_key" translatable="false">AIzaSyBa5OsxKPI08QBNICDySssOPP9LSdE3OzY</string>
+    <string name="google_storage_bucket" translatable="false">auxilio-6a9f7.appspot.com</string>
+    <string name="project_id" translatable="false">auxilio-6a9f7</string>
+</resources>
