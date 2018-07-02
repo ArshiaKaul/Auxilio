@@ -49,5 +49,15 @@
         android:textSize="50sp"
         android:textStyle="bold" />
 
+    <TextView
+        android:id="@+id/delete_button"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:background="@color/colorPrimary"
+        android:text="Tap to delete all photos from Kairos"
+        android:textSize="20sp"
+        android:textColor="@android:color/white" />
+
 </LinearLayout>
 

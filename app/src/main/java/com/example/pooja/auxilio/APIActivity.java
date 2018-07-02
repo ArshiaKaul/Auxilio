@@ -54,6 +54,7 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 import static android.Manifest.permission.CAMERA;
+import static android.Manifest.permission.GET_ACCOUNTS;
 import static android.Manifest.permission.RECORD_AUDIO;
 import static android.Manifest.permission.WRITE_EXTERNAL_STORAGE;
 import static java.security.AccessController.getContext;
@@ -71,10 +72,17 @@ public class APIActivity extends AppCompatActivity {
     private ProgressBar progressBar ;
     private ImageView checkSign;
     private TextView goToHomescreen;
+    private TextView deleteButton;
+
+    private String app_id = "b44ea952";
+    private String api_key = "9d5cec3afba947522606cbfa90defd5c";
 
     private static final int CAMERA_REQUEST_CODE = 1;
 
     private StorageReference storageReference;
+
+    //private DatabaseReference mCount;
+    //public int audioCounter;
 
     MediaPlayer mediaPlayer = null;
 
@@ -106,10 +114,12 @@ public class APIActivity extends AppCompatActivity {
         progressBar = (ProgressBar)findViewById(R.id.progressBar);
         checkSign = (ImageView) findViewById(R.id.check_sign);
         goToHomescreen = (TextView) findViewById(R.id.goto_homescreen);
+        deleteButton = (TextView) findViewById(R.id.delete_button);
 
         //setting visibilities
         checkSign.setVisibility(View.GONE);
         goToHomescreen.setVisibility(View.GONE);
+        deleteButton.setVisibility(View.GONE);
 
         storageReference = FirebaseStorage.getInstance().getReference();
 
@@ -145,6 +155,21 @@ public class APIActivity extends AppCompatActivity {
             public void onClick(View v) {
                 mediaPlayer.stop();
                 mediaPlayer.release();
+                Intent intent = new Intent(APIActivity.this, GestureActivity.class);
+                startActivity(intent);
+                finish();
+            }
+        });
+
+        deleteButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mediaPlayer.stop();
+                mediaPlayer.release();
+
+                deleteGalleryKairos();
+                //deleteGalleryFirebase();
+
                 Intent intent = new Intent(APIActivity.this, GestureActivity.class);
                 startActivity(intent);
                 finish();
@@ -238,8 +263,6 @@ public class APIActivity extends AppCompatActivity {
         try {
             Kairos myKairos = new Kairos();
             // set authentication
-            String app_id = "b44ea952";
-            String api_key = "9d5cec3afba947522606cbfa90defd5c";
             myKairos.setAuthentication(getApplicationContext(), app_id, api_key);
             String image = uri.toString();
             String galleryId = userPhoneNumber;
@@ -264,6 +287,7 @@ public class APIActivity extends AppCompatActivity {
                 progressBar.setVisibility(View.GONE);
                 checkSign.setVisibility(View.VISIBLE);
                 goToHomescreen.setVisibility(View.VISIBLE);
+                deleteButton.setVisibility(View.VISIBLE);
                 mediaPlayer = MediaPlayer.create(getApplicationContext(), R.raw.taptogotohomescreen);
                 mediaPlayer.start();
 
@@ -331,6 +355,7 @@ public class APIActivity extends AppCompatActivity {
                 progressBar.setVisibility(View.GONE);
                 checkSign.setVisibility(View.VISIBLE);
                 goToHomescreen.setVisibility(View.VISIBLE);
+                deleteButton.setVisibility(View.VISIBLE);
                 mediaPlayer = MediaPlayer.create(getApplicationContext(), R.raw.taptogotohomescreen);
                 mediaPlayer.start();
             }
@@ -364,6 +389,89 @@ public class APIActivity extends AppCompatActivity {
         mediaPlayer.stop();
         mediaPlayer.release();
     }
+
+    public void deleteGalleryKairos(){
+        // List out all subjects in a given gallery
+        String galleryId = FirebaseAuth.getInstance().getCurrentUser().getPhoneNumber();
+
+        // create kairos listener
+        KairosListener listener = new KairosListener() {
+
+            @Override
+            public void onSuccess(String response) {
+                // your code here!
+                Log.d("GALLERY DELETED", response);
+                Toast.makeText(getApplicationContext(), "GALLERY DELETED", Toast.LENGTH_SHORT).show();
+            }
+
+            @Override
+            public void onFail(String response) {
+                // your code here!
+                Log.d("ERROR DELETING GALLERY", response);
+                Toast.makeText(getApplicationContext(), "GALLERY NOT DELETED", Toast.LENGTH_SHORT).show();
+            }
+        };
+
+        Kairos myKairos = new Kairos();
+
+        myKairos.setAuthentication(getApplicationContext(), app_id, api_key);
+
+        try{
+            myKairos.deleteGallery(galleryId, listener);
+        }catch (JSONException e){
+            e.printStackTrace();
+        }catch (UnsupportedEncodingException e){
+            e.printStackTrace();
+        }
+
+    }
+
+   /* public void deleteGalleryFirebase(){
+        // Create a storage reference from our app
+       // StorageReference storageRef = storage.getReference();
+
+        // Create a reference to the file to delete
+        final String userPhoneNumber = FirebaseAuth.getInstance().getCurrentUser().getPhoneNumber();
+        uniquefilename = userPhoneNumber.toString();
+        StorageReference filePath = storageReference.child("/" + uniquefilename);
+
+        // Delete the file
+        filePath.delete().addOnSuccessListener(new OnSuccessListener<Void>() {
+            @Override
+            public void onSuccess(Void aVoid) {
+                // File deleted successfully
+                Toast.makeText(APIActivity.this, "Firebase Gallery Deleted", Toast.LENGTH_SHORT).show();
+                setCounterToZero();
+            }
+        }).addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception exception) {
+                // Uh-oh, an error occurred!
+                Toast.makeText(APIActivity.this, "Firebase Gallery NOT Deleted", Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    public void setCounterToZero(){
+        mCount = FirebaseDatabase.getInstance().getReference().child(FirebaseAuth.getInstance().getCurrentUser().getPhoneNumber().toString()).child("count");
+
+
+        mCount.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                audioCounter = dataSnapshot.getValue(Integer.class);
+                audioCounter = 0;
+                mCount.setValue(audioCounter);
+                Toast.makeText(APIActivity.this, "Counter = 0", Toast.LENGTH_SHORT).show();
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+                Log.d("The read failed: ", "FAILED");
+                Toast.makeText(APIActivity.this, "Counter NOT 0", Toast.LENGTH_SHORT).show();
+            }
+        });
+    }*/
 
 }
 
