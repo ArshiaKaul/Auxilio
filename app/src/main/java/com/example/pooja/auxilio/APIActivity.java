@@ -8,12 +8,15 @@ import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.PorterDuff;
+import android.graphics.drawable.Drawable;
 import android.media.AudioAttributes;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.media.MediaRecorder;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Environment;
 import android.os.Handler;
 import android.provider.MediaStore;
@@ -48,10 +51,18 @@ import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 
+import java.io.BufferedInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
+import java.lang.ref.WeakReference;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.net.URLConnection;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -71,7 +82,7 @@ import org.w3c.dom.Text;
 public class APIActivity extends AppCompatActivity {
 
     private Button tapCameraBtn;
-    private ProgressBar progressBar ;
+    private ProgressBar progressBar;
     private ImageView checkSign;
     private TextView goToHomescreen;
     private TextView deleteButton;
@@ -79,7 +90,7 @@ public class APIActivity extends AppCompatActivity {
     private String app_id = "b44ea952";
     private String api_key = "9d5cec3afba947522606cbfa90defd5c";
 
-    private static final int CAMERA_REQUEST_CODE = 1;
+    //private static final int CAMERA_REQUEST_CODE = 1;
 
     private StorageReference storageReference;
 
@@ -91,7 +102,7 @@ public class APIActivity extends AppCompatActivity {
     SharedPreferences spForUploadCounter;
 
     //permission variables
-    private String [] permissions = {android.Manifest.permission.RECORD_AUDIO, android.Manifest.permission.CAMERA, android.Manifest.permission.WRITE_EXTERNAL_STORAGE};
+    private String[] permissions = {android.Manifest.permission.RECORD_AUDIO, android.Manifest.permission.CAMERA, android.Manifest.permission.WRITE_EXTERNAL_STORAGE};
 
     //another request
     public static final int RequestPermissionCode = 1;
@@ -102,7 +113,7 @@ public class APIActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_api);
-        this.getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,WindowManager.LayoutParams.FLAG_FULLSCREEN);
+        this.getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
 
         mediaPlayer = MediaPlayer.create(getApplicationContext(), R.raw.taptoopencamera);
         mediaPlayer.start();
@@ -113,12 +124,13 @@ public class APIActivity extends AppCompatActivity {
 
         //referencing the storage directory
         tapCameraBtn = (Button) findViewById(R.id.tapCameraBtn);
-        progressBar = (ProgressBar)findViewById(R.id.progressBar);
+        progressBar = (ProgressBar) findViewById(R.id.progressBar);
         checkSign = (ImageView) findViewById(R.id.check_sign);
         goToHomescreen = (TextView) findViewById(R.id.goto_homescreen);
         deleteButton = (TextView) findViewById(R.id.delete_button);
 
         //setting visibilities
+        progressBar.setVisibility(View.GONE);
         checkSign.setVisibility(View.GONE);
         goToHomescreen.setVisibility(View.GONE);
         deleteButton.setVisibility(View.GONE);
@@ -129,23 +141,21 @@ public class APIActivity extends AppCompatActivity {
         tapCameraBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
-                mediaPlayer.stop();
-
-                if(!checkPermission()){
-                    requestPermission();
-                }else{
-                    Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-                    startActivityForResult(intent, CAMERA_REQUEST_CODE);
+                if(mediaPlayer.isPlaying()){
+                    mediaPlayer.stop();
                 }
+                new LoadImage().execute("http://192.168.43.64:8080/photoaf.jpg");
+
             }
         });
 
         checkSign.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                mediaPlayer.stop();
-                mediaPlayer.release();
+                if(mediaPlayer.isPlaying()){
+                    mediaPlayer.stop();
+                    mediaPlayer.release();
+                }
                 Intent intent = new Intent(APIActivity.this, GestureActivity.class);
                 startActivity(intent);
                 finish();
@@ -155,8 +165,10 @@ public class APIActivity extends AppCompatActivity {
         goToHomescreen.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                mediaPlayer.stop();
-                mediaPlayer.release();
+                if(mediaPlayer.isPlaying()){
+                    mediaPlayer.stop();
+                    mediaPlayer.release();
+                }
                 Intent intent = new Intent(APIActivity.this, GestureActivity.class);
                 startActivity(intent);
                 finish();
@@ -166,8 +178,10 @@ public class APIActivity extends AppCompatActivity {
         deleteButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                mediaPlayer.stop();
-                mediaPlayer.release();
+                if(mediaPlayer.isPlaying()){
+                    mediaPlayer.stop();
+                    mediaPlayer.release();
+                }
 
                 deleteGalleryKairos();
                 //deleteGalleryFirebase();
@@ -177,29 +191,6 @@ public class APIActivity extends AppCompatActivity {
                 finish();
             }
         });
-
-    }
-
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-
-        if(requestCode == CAMERA_REQUEST_CODE && resultCode == RESULT_OK && data!= null){
-            mediaPlayer = MediaPlayer.create(getApplicationContext(), R.raw.waitwhilepicisuploaded);
-            mediaPlayer.start();
-
-            final Bitmap photo = (Bitmap) data.getExtras().get("data");
-            //the tap to open camera button disappears
-            tapCameraBtn.setVisibility(Button.GONE);
-
-            //setting the color of progress bar to white
-            progressBar.getIndeterminateDrawable().setColorFilter(ContextCompat.getColor(this, android.R.color.white), PorterDuff.Mode.SRC_IN );
-
-            //and now we make the progress bar visible instead of the button
-            progressBar.setVisibility(ProgressBar.VISIBLE);
-
-            uploadPhoto(photo);
-        }
 
     }
 
@@ -218,7 +209,7 @@ public class APIActivity extends AppCompatActivity {
         return true;
     }
 
-    public void uploadPhoto(Bitmap photo){
+    public void uploadPhoto(Bitmap photo) {
 
         final Uri uri = getImageUri(getApplicationContext(), photo);
         final String userPhoneNumber = FirebaseAuth.getInstance().getCurrentUser().getPhoneNumber();
@@ -227,16 +218,13 @@ public class APIActivity extends AppCompatActivity {
         uploadPhotoToFirebase(uri, userPhoneNumber, uniquefilename);
     }
 
-    public void uploadPhotoToFirebase(Uri uri, final String userPhoneNumber, String uniquefilename){
+    public void uploadPhotoToFirebase(Uri uri, final String userPhoneNumber, String uniquefilename) {
 
         final StorageReference filepath = storageReference.child("/" + uniquefilename + "/photos/" + "test_photo");
 
         filepath.putFile(uri).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
             @Override
             public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
-
-                mediaPlayer.stop();
-                mediaPlayer.release();
 
                 filepath.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
                     @Override
@@ -253,12 +241,12 @@ public class APIActivity extends AppCompatActivity {
                     }
                 });
 
-                Toast.makeText(APIActivity.this, "Uploading finished!", Toast.LENGTH_LONG).show();
+                Toast.makeText(APIActivity.this, "test_photo uploaded", Toast.LENGTH_LONG).show();
             }
         });
     }
 
-    public void recognizePhotoKairos(Uri uri, String userPhoneNumber){
+    public void recognizePhotoKairos(Uri uri, String userPhoneNumber) {
 
         KairosListener listener = createKairosListener();
 
@@ -278,28 +266,22 @@ public class APIActivity extends AppCompatActivity {
         }
     }
 
-    public KairosListener createKairosListener(){
+    public KairosListener createKairosListener() {
         return new KairosListener() {
 
             @Override
             public void onSuccess(String response) {
                 // your code here!
                 Log.d("SUCCESSFUL KAIROS", response);
-                Toast.makeText(getApplicationContext(), response, Toast.LENGTH_SHORT).show();
-                progressBar.setVisibility(View.GONE);
-                checkSign.setVisibility(View.VISIBLE);
-                goToHomescreen.setVisibility(View.VISIBLE);
-                deleteButton.setVisibility(View.VISIBLE);
-                mediaPlayer = MediaPlayer.create(getApplicationContext(), R.raw.taptogotohomescreen);
-                mediaPlayer.start();
+                Toast.makeText(getApplicationContext(), "Almost there", Toast.LENGTH_LONG).show();
 
                 boolean flag = isJSONValid(response);
-                if(flag)
+                if (flag)
                     Log.d("JSON", "VALID JSON");
                 else
                     Log.d("JSON", "INVALID JSON");
 
-                try{
+                try {
                     JSONObject jsonObject = new JSONObject(response);
                     JSONArray images = jsonObject.getJSONArray("images");
                     JSONObject zero = images.getJSONObject(Integer.parseInt("0"));
@@ -310,33 +292,37 @@ public class APIActivity extends AppCompatActivity {
 
                     Toast.makeText(APIActivity.this, name + " " + confidence, Toast.LENGTH_SHORT).show();
                     String photoNum = name.split("_")[1];
-
+                    Toast.makeText(APIActivity.this, "audio_" + photoNum + ".3gpp", Toast.LENGTH_SHORT).show();
                     storageReference = FirebaseStorage.getInstance().getReference()
                             .child(FirebaseAuth.getInstance().getCurrentUser().getPhoneNumber().toString()).child("audios").child("audio_" + photoNum);
 
-                    Toast.makeText(APIActivity.this, "audio_" + photoNum + ".3gpp", Toast.LENGTH_SHORT).show();
+
+                    /*if (confidence >= 0.6) {
+                        Toast.makeText(APIActivity.this, name + " " + confidence, Toast.LENGTH_SHORT).show();
+                    } else {
+                        Toast.makeText(APIActivity.this, "No match found", Toast.LENGTH_SHORT).show();
+                    }*/
 
                     storageReference.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
                         @Override
                         public void onSuccess(Uri audioUri) {
-                            /*try{
-                                mediaPlayer.setDataSource(getApplicationContext(), audioUri);
-                                mediaPlayer.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
-                                    @Override
-                                    public void onPrepared(MediaPlayer mp) {
-                                        mp.start();
-                                    }
-                                });
-                            }catch(IOException e){
-                                Toast.makeText(APIActivity.this, "Cannot play audio", Toast.LENGTH_SHORT).show();
-                            }*/
-                            //String url = "https://firebasestorage.googleapis.com/v0/b/auxilio-6a9f7.appspot.com/o/%2B918383009353%2Faudios%2Faudio_0?alt=media&token=b1c3dbab-0c73-4179-96dd-52ad519daf13"; // your URL here
-                            try{
+                            try {
                                 MediaPlayer mediaPlayer = new MediaPlayer();
                                 mediaPlayer.setDataSource(audioUri.toString());
                                 mediaPlayer.prepare(); // might take long! (for buffering, etc)
                                 mediaPlayer.start();
-                            }catch (IOException e){
+
+                                tapCameraBtn.setVisibility(View.GONE);
+                                progressBar.setVisibility(View.GONE);
+                                checkSign.setVisibility(View.VISIBLE);
+                                goToHomescreen.setVisibility(View.VISIBLE);
+                                deleteButton.setVisibility(View.VISIBLE);
+
+                                while(mediaPlayer.isPlaying());
+                                mediaPlayer = MediaPlayer.create(getApplicationContext(), R.raw.taptogotohomescreen);
+                                mediaPlayer.start();
+
+                            } catch (IOException e) {
                                 e.printStackTrace();
                             }
 
@@ -348,13 +334,7 @@ public class APIActivity extends AppCompatActivity {
                         }
                     });
 
-                    if(confidence >= 0.6){
-                        Toast.makeText(APIActivity.this, name + " " + confidence, Toast.LENGTH_SHORT).show();
-                    }else{
-                        Toast.makeText(APIActivity.this, "No match found", Toast.LENGTH_SHORT).show();
-                    }
-
-                }catch (JSONException e){
+                } catch (JSONException e) {
                     e.printStackTrace();
                 }
             }
@@ -364,12 +344,6 @@ public class APIActivity extends AppCompatActivity {
                 // your code here!
                 Log.d("ERROR KAIROS", response);
                 Toast.makeText(getApplicationContext(), "Kairos Upload ERROR", Toast.LENGTH_SHORT).show();
-                progressBar.setVisibility(View.GONE);
-                checkSign.setVisibility(View.VISIBLE);
-                goToHomescreen.setVisibility(View.VISIBLE);
-                deleteButton.setVisibility(View.VISIBLE);
-                mediaPlayer = MediaPlayer.create(getApplicationContext(), R.raw.taptogotohomescreen);
-                mediaPlayer.start();
             }
         };
     }
@@ -402,7 +376,7 @@ public class APIActivity extends AppCompatActivity {
         mediaPlayer.release();
     }
 
-    public void deleteGalleryKairos(){
+    public void deleteGalleryKairos() {
         // List out all subjects in a given gallery
         String galleryId = FirebaseAuth.getInstance().getCurrentUser().getPhoneNumber();
 
@@ -428,62 +402,65 @@ public class APIActivity extends AppCompatActivity {
 
         myKairos.setAuthentication(getApplicationContext(), app_id, api_key);
 
-        try{
+        try {
             myKairos.deleteGallery(galleryId, listener);
-        }catch (JSONException e){
+        } catch (JSONException e) {
             e.printStackTrace();
-        }catch (UnsupportedEncodingException e){
+        } catch (UnsupportedEncodingException e) {
             e.printStackTrace();
         }
 
     }
 
-   /* public void deleteGalleryFirebase(){
-        // Create a storage reference from our app
-       // StorageReference storageRef = storage.getReference();
+    class LoadImage extends AsyncTask<String, Void, Bitmap> {
 
-        // Create a reference to the file to delete
-        final String userPhoneNumber = FirebaseAuth.getInstance().getCurrentUser().getPhoneNumber();
-        uniquefilename = userPhoneNumber.toString();
-        StorageReference filePath = storageReference.child("/" + uniquefilename);
+        @Override
+        protected void onPreExecute(){
+            progressBar.setVisibility(View.VISIBLE);
+        }
 
-        // Delete the file
-        filePath.delete().addOnSuccessListener(new OnSuccessListener<Void>() {
-            @Override
-            public void onSuccess(Void aVoid) {
-                // File deleted successfully
-                Toast.makeText(APIActivity.this, "Firebase Gallery Deleted", Toast.LENGTH_SHORT).show();
-                setCounterToZero();
+        @Override
+        protected Bitmap doInBackground(String... params) {
+            try {
+                return downloadBitmap(params[0]);
+            } catch (Exception e) {
+                // log error
             }
-        }).addOnFailureListener(new OnFailureListener() {
-            @Override
-            public void onFailure(@NonNull Exception exception) {
-                // Uh-oh, an error occurred!
-                Toast.makeText(APIActivity.this, "Firebase Gallery NOT Deleted", Toast.LENGTH_SHORT).show();
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Bitmap bitmap) {
+            Toast.makeText(APIActivity.this, "Analyzing photo", Toast.LENGTH_LONG).show();
+            uploadPhoto(bitmap);
+        }
+
+        private Bitmap downloadBitmap(String url) {
+            HttpURLConnection urlConnection = null;
+            try {
+                URL uri = new URL(url);
+                urlConnection = (HttpURLConnection) uri.openConnection();
+                int statusCode = urlConnection.getResponseCode();
+                if (statusCode != urlConnection.HTTP_OK) {
+                    return null;
+                }
+
+                InputStream inputStream = urlConnection.getInputStream();
+                if (inputStream != null) {
+                    Bitmap bitmap = BitmapFactory.decodeStream(inputStream);
+                    return bitmap;
+                }
+            } catch (Exception e) {
+                urlConnection.disconnect();
+                Log.w("ImageDownloader", "Error downloading image from " + url);
+            } finally {
+                if (urlConnection != null) {
+                    urlConnection.disconnect();
+                }
             }
-        });
+            return null;
+        }
+
     }
-
-    public void setCounterToZero(){
-        mCount = FirebaseDatabase.getInstance().getReference().child(FirebaseAuth.getInstance().getCurrentUser().getPhoneNumber().toString()).child("count");
-
-
-        mCount.addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                audioCounter = dataSnapshot.getValue(Integer.class);
-                audioCounter = 0;
-                mCount.setValue(audioCounter);
-                Toast.makeText(APIActivity.this, "Counter = 0", Toast.LENGTH_SHORT).show();
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-                Log.d("The read failed: ", "FAILED");
-                Toast.makeText(APIActivity.this, "Counter NOT 0", Toast.LENGTH_SHORT).show();
-            }
-        });
-    }*/
-
 }
 
