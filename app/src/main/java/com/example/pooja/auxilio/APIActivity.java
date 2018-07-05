@@ -87,8 +87,8 @@ public class APIActivity extends AppCompatActivity {
     private TextView goToHomescreen;
     private TextView deleteButton;
 
-    private String app_id = "b44ea952";
-    private String api_key = "9d5cec3afba947522606cbfa90defd5c";
+    private String app_id = "XXXXXXXX"; //app id
+    private String api_key = "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX";    //api key
 
     //private static final int CAMERA_REQUEST_CODE = 1;
 

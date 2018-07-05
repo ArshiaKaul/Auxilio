@@ -43,8 +43,8 @@ public class AuthActivity extends AppCompatActivity {
     Kairos myKairos = new Kairos();
 
     // set authentication
-    String app_id = "b44ea952";
-    String api_key = "9d5cec3afba947522606cbfa90defd5c";
+    String app_id = "XXXXXX";   //app id
+    String api_key = "XXXXXXXXXXXXXXXXXXXXXX"; //api key
 
     private EditText phone_et;
     private EditText otp_et;
