@@ -70,6 +70,9 @@ import static android.Manifest.permission.CAMERA;
 import static android.Manifest.permission.GET_ACCOUNTS;
 import static android.Manifest.permission.RECORD_AUDIO;
 import static android.Manifest.permission.WRITE_EXTERNAL_STORAGE;
+import static com.example.pooja.auxilio.AuthActivity.KEY_IP;
+import static com.example.pooja.auxilio.AuthActivity.ip_address_entered;
+import static com.example.pooja.auxilio.AuthActivity.sp;
 import static java.security.AccessController.getContext;
 
 import com.kairos.*;
@@ -87,8 +90,8 @@ public class APIActivity extends AppCompatActivity {
     private TextView goToHomescreen;
     private TextView deleteButton;
 
-    private String app_id = "XXXXXXXX"; //app id
-    private String api_key = "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX";    //api key
+    private String app_id = "b44ea952"; //app id
+    private String api_key = "9d5cec3afba947522606cbfa90defd5c";    //api key
 
     //private static final int CAMERA_REQUEST_CODE = 1;
 
@@ -115,7 +118,7 @@ public class APIActivity extends AppCompatActivity {
         setContentView(R.layout.activity_api);
         this.getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
 
-        mediaPlayer = MediaPlayer.create(getApplicationContext(), R.raw.taptoopencamera);
+        mediaPlayer = MediaPlayer.create(getApplicationContext(), R.raw.taponscreen);
         mediaPlayer.start();
 
         //initializing spForUploadCounter sharedpreference with key_name = uploadCounter
@@ -137,6 +140,8 @@ public class APIActivity extends AppCompatActivity {
 
         storageReference = FirebaseStorage.getInstance().getReference();
 
+        if(!checkPermission())
+            requestPermission();
 
         tapCameraBtn.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -144,7 +149,14 @@ public class APIActivity extends AppCompatActivity {
                 if(mediaPlayer.isPlaying()){
                     mediaPlayer.stop();
                 }
-                new LoadImage().execute("http://192.168.43.64:8080/photoaf.jpg");
+
+                if (sp.contains(KEY_IP)) {
+                    ip_address_entered = sp.getString(KEY_IP, "");
+                }
+
+                String finalIPReceived = "http://" + ip_address_entered  + "/photoaf.jpg";
+                new LoadImage().execute(finalIPReceived);
+                Log.d("Final IP" , finalIPReceived);
 
             }
         });
@@ -285,16 +297,37 @@ public class APIActivity extends AppCompatActivity {
                     JSONObject jsonObject = new JSONObject(response);
                     JSONArray images = jsonObject.getJSONArray("images");
                     JSONObject zero = images.getJSONObject(Integer.parseInt("0"));
-                    JSONArray candidates = zero.getJSONArray("candidates");
-                    JSONObject candidate_zero = candidates.getJSONObject(Integer.parseInt("0"));
-                    String name = candidate_zero.getString("subject_id");
-                    Double confidence = candidate_zero.getDouble("confidence");
 
-                    Toast.makeText(APIActivity.this, name + " " + confidence, Toast.LENGTH_SHORT).show();
-                    String photoNum = name.split("_")[1];
-                    Toast.makeText(APIActivity.this, "audio_" + photoNum + ".3gpp", Toast.LENGTH_SHORT).show();
-                    storageReference = FirebaseStorage.getInstance().getReference()
-                            .child(FirebaseAuth.getInstance().getCurrentUser().getPhoneNumber().toString()).child("audios").child("audio_" + photoNum);
+                    if (zero.has("candidates")) {
+                        JSONArray candidates = zero.getJSONArray("candidates");
+                        JSONObject candidate_zero = candidates.getJSONObject(Integer.parseInt("0"));
+                        String name = candidate_zero.getString("subject_id");
+                        Double confidence = candidate_zero.getDouble("confidence");
+
+
+                        Toast.makeText(APIActivity.this, name + " " + confidence, Toast.LENGTH_SHORT).show();
+                        String photoNum = name.split("_")[1];
+                        Toast.makeText(APIActivity.this, "audio_" + photoNum + ".3gpp", Toast.LENGTH_SHORT).show();
+                        storageReference = FirebaseStorage.getInstance().getReference()
+                                .child(FirebaseAuth.getInstance().getCurrentUser().getPhoneNumber().toString()).child("audios").child("audio_" + photoNum);
+
+
+                        mediaPlayer = MediaPlayer.create(getApplicationContext(), R.raw.personnameis);
+                        mediaPlayer.start();
+
+                        tapCameraBtn.setVisibility(View.GONE);
+                        progressBar.setVisibility(View.GONE);
+                        checkSign.setVisibility(View.VISIBLE);
+                        goToHomescreen.setVisibility(View.VISIBLE);
+                        deleteButton.setVisibility(View.VISIBLE);
+
+                    /*if(confidence < 0.6){
+                        if(mediaPlayer.isPlaying()){
+                            mediaPlayer = MediaPlayer.create(getApplicationContext(), R.raw.personnotincontacts);
+                            mediaPlayer.start();
+                        }
+
+                    }*/
 
 
                     /*if (confidence >= 0.6) {
@@ -303,36 +336,63 @@ public class APIActivity extends AppCompatActivity {
                         Toast.makeText(APIActivity.this, "No match found", Toast.LENGTH_SHORT).show();
                     }*/
 
-                    storageReference.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
-                        @Override
-                        public void onSuccess(Uri audioUri) {
-                            try {
-                                MediaPlayer mediaPlayer = new MediaPlayer();
-                                mediaPlayer.setDataSource(audioUri.toString());
-                                mediaPlayer.prepare(); // might take long! (for buffering, etc)
-                                mediaPlayer.start();
+                        storageReference.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
+                            @Override
+                            public void onSuccess(Uri audioUri) {
+                                try {
 
-                                tapCameraBtn.setVisibility(View.GONE);
-                                progressBar.setVisibility(View.GONE);
-                                checkSign.setVisibility(View.VISIBLE);
-                                goToHomescreen.setVisibility(View.VISIBLE);
-                                deleteButton.setVisibility(View.VISIBLE);
 
-                                while(mediaPlayer.isPlaying());
+                                    while(mediaPlayer.isPlaying());
+                                    MediaPlayer mediaPlayer = new MediaPlayer();
+                                    mediaPlayer.setDataSource(audioUri.toString());
+                                    mediaPlayer.prepare(); // might take long! (for buffering, etc)
+                                    mediaPlayer.start();
+
+
+                                } catch (IOException e) {
+                                    e.printStackTrace();
+                                }
+
+                            }
+                        }).addOnFailureListener(new OnFailureListener() {
+                            @Override
+                            public void onFailure(@NonNull Exception e) {
+                                Toast.makeText(APIActivity.this, "Cannot find audio", Toast.LENGTH_SHORT).show();
+                            }
+                        });
+
+
+
+
+                        while (mediaPlayer.isPlaying()) ;
+                        final Handler handler = new Handler();
+                        handler.postDelayed(new Runnable() {
+                            @Override
+                            public void run() {
                                 mediaPlayer = MediaPlayer.create(getApplicationContext(), R.raw.taptogotohomescreen);
                                 mediaPlayer.start();
 
-                            } catch (IOException e) {
-                                e.printStackTrace();
                             }
+                        }, 4000);
 
-                        }
-                    }).addOnFailureListener(new OnFailureListener() {
-                        @Override
-                        public void onFailure(@NonNull Exception e) {
-                            Toast.makeText(APIActivity.this, "Cannot find audio", Toast.LENGTH_SHORT).show();
-                        }
-                    });
+                    } else {
+
+                        tapCameraBtn.setVisibility(View.GONE);
+                        progressBar.setVisibility(View.GONE);
+                        checkSign.setVisibility(View.VISIBLE);
+                        goToHomescreen.setVisibility(View.VISIBLE);
+                        deleteButton.setVisibility(View.VISIBLE);
+
+                        mediaPlayer = MediaPlayer.create(getApplicationContext(), R.raw.personnotincontacts);
+                        mediaPlayer.start();
+
+
+                        while(mediaPlayer.isPlaying());
+                        mediaPlayer = MediaPlayer.create(getApplicationContext(), R.raw.taptogotohomescreen);
+                        mediaPlayer.start();
+
+                    }
+
 
                 } catch (JSONException e) {
                     e.printStackTrace();
@@ -461,6 +521,23 @@ public class APIActivity extends AppCompatActivity {
             return null;
         }
 
+    }
+
+    @Override
+    public void onStop()
+    {
+        super.onStop();
+        try{
+            if(mediaPlayer !=null && mediaPlayer.isPlaying()){
+                Log.d("TAG------->", "player is running");
+                mediaPlayer.stop();
+                Log.d("Tag------->", "player is stopped");
+                mediaPlayer.release();
+                Log.d("TAG------->", "player is released");
+            }
+        }catch(IllegalStateException e){
+            Log.d("IllegalStateException" , "it occurs");
+        }
     }
 }
 

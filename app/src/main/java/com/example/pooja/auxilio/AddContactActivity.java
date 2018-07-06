@@ -276,4 +276,23 @@ public class AddContactActivity extends AppCompatActivity {
         mediaPlayer.stop();
         mediaPlayer.release();
     }
+
+
+    @Override
+    public void onStop()
+    {
+        super.onStop();
+        try{
+            if(mediaPlayer !=null && mediaPlayer.isPlaying()){
+                Log.d("TAG------->", "player is running");
+                mediaPlayer.stop();
+                Log.d("Tag------->", "player is stopped");
+                mediaPlayer.release();
+                Log.d("TAG------->", "player is released");
+            }
+        }catch(IllegalStateException e){
+            Log.d("IllegalStateException" , "it occurs");
+        }
+    }
+
 }

@@ -117,8 +117,6 @@ public class RecordAudioActivity extends AppCompatActivity {
 
         storeAudioToFirebase();
 
-
-
     }
 
 
@@ -185,8 +183,6 @@ public class RecordAudioActivity extends AppCompatActivity {
 
         isRecording = true;
         mRecorder.start();
-
-
 
     }
 

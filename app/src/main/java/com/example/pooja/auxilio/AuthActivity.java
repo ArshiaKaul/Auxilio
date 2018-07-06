@@ -1,6 +1,7 @@
 package com.example.pooja.auxilio;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.support.annotation.NonNull;
@@ -42,18 +43,26 @@ public class AuthActivity extends AppCompatActivity {
     // instantiate a new kairos instance
     Kairos myKairos = new Kairos();
 
+    public static String ip_address_entered   = null;
+
     // set authentication
-    String app_id = "XXXXXX";   //app id
-    String api_key = "XXXXXXXXXXXXXXXXXXXXXX"; //api key
+    String app_id = "b44ea952";   //app id
+    String api_key = "9d5cec3afba947522606cbfa90defd5c"; //api key
 
     private EditText phone_et;
     private EditText otp_et;
     private Button register_btn;
+    private Button proceed_btn;
     private TextView error_tv;
     private TextView error_invalid_phoneno;
+    private TextView about_otp;
+    private EditText ip_address_et;
 
     private int btnType = 0;
 
+    static SharedPreferences sp;
+    public static final String USER_PREF = "USER_PREF_IP_ADDR" ;
+    public static final String KEY_IP = "KEY_NAME";
 
     private String mVerificationId;
     private PhoneAuthProvider.ForceResendingToken mResendToken;
@@ -74,6 +83,8 @@ public class AuthActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_auth);
 
+        sp = getSharedPreferences(USER_PREF, Context.MODE_PRIVATE);
+
         this.getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,WindowManager.LayoutParams.FLAG_FULLSCREEN);
         // Create an instance of the KairosListener
         KairosListener listener = new KairosListener() {
@@ -93,29 +104,35 @@ public class AuthActivity extends AppCompatActivity {
             }
         };
 
-
-        myKairos.setAuthentication(this, app_id, api_key);
-
-        authStateListener = new FirebaseAuth.AuthStateListener() {
-            @Override
-            public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
-                FirebaseUser firebaseUser = firebaseAuth.getCurrentUser();
-                if (firebaseUser != null) {
-                    Intent intent = new Intent(AuthActivity.this, GestureActivity.class);
-                    startActivity(intent);
-                    finish();
-                }
-            }
-        };
-
+        ip_address_et = (EditText)findViewById(R.id.ip_address_et);
 
         phone_et = (EditText)findViewById(R.id.phone_et);
         otp_et = (EditText)findViewById(R.id.otp_et);
 
         error_tv = (TextView)findViewById(R.id.error_tv);
         error_invalid_phoneno = (TextView)findViewById(R.id.error_invalid_phoneno);
+        about_otp = (TextView)findViewById(R.id.about_otp);
 
         register_btn = (Button)findViewById(R.id.register_btn);
+        proceed_btn = (Button)findViewById(R.id.proceed_btn);
+
+        myKairos.setAuthentication(this, app_id, api_key);
+
+        if (sp.contains(KEY_IP)) {
+            ip_address_entered = sp.getString(KEY_IP, "");
+        }
+
+        authStateListener = new FirebaseAuth.AuthStateListener() {
+            @Override
+            public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
+                FirebaseUser firebaseUser = firebaseAuth.getCurrentUser();
+                if (firebaseUser != null && ip_address_entered != null && !ip_address_entered.isEmpty() ) {
+                    Intent intent = new Intent(AuthActivity.this, GestureActivity.class);
+                    startActivity(intent);
+                    finish();
+                }
+            }
+        };
 
         mAuth = FirebaseAuth.getInstance();
 
@@ -183,20 +200,42 @@ public class AuthActivity extends AppCompatActivity {
                 otp_et.setVisibility(View.VISIBLE);
                 // ...
             }
-
         };
-
-
     }
 
+    public void callMeForIP(){
+        final Intent intent = new Intent(AuthActivity.this, GestureActivity.class);
+
+        otp_et.setVisibility(View.GONE);
+        phone_et.setVisibility(View.GONE);
+        about_otp.setVisibility(View.GONE);
+        ip_address_et.setVisibility(View.VISIBLE);
+        register_btn.setVisibility(View.GONE);
+        proceed_btn.setVisibility(View.VISIBLE);
+
+        proceed_btn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+                ip_address_entered = ip_address_et.getText().toString();
+                Toast.makeText(AuthActivity.this, "Ip is " + ip_address_entered, Toast.LENGTH_LONG).show();
+
+
+                SharedPreferences.Editor editor = sp.edit();
+                editor.putString(KEY_IP, ip_address_entered);
+                editor.commit();
+
+                startActivity(intent);
+                finish();
+            }
+        });
+    }
 
     @Override
     protected void onStart() {
         super.onStart();
         firebaseAuth.addAuthStateListener(authStateListener);
     }
-
-
 
 
     private void signInWithPhoneAuthCredential(PhoneAuthCredential credential) {
@@ -210,7 +249,6 @@ public class AuthActivity extends AppCompatActivity {
 
                             FirebaseUser user = task.getResult().getUser();
 
-                            Intent intent = new Intent(AuthActivity.this, GestureActivity.class);
                             mRoot = FirebaseDatabase.getInstance().getReference();
                             mUserPhoneNumber = mRoot.child(FirebaseAuth.getInstance().getCurrentUser().getPhoneNumber().toString());
                             mUserPhoneNumber.addListenerForSingleValueEvent(new ValueEventListener() {
@@ -240,8 +278,8 @@ public class AuthActivity extends AppCompatActivity {
                             editor.commit();
 
                             */
-                            startActivity(intent);
-                            finish();
+
+                            callMeForIP();
 
                             // ...
                         } else {
@@ -256,8 +294,4 @@ public class AuthActivity extends AppCompatActivity {
                     }
                 });
     }
-
-
-
-
 }

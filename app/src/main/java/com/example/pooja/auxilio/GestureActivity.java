@@ -31,7 +31,6 @@ public class GestureActivity extends AppCompatActivity {
     private GestureDetectorCompat mDetector;
     private MediaPlayer mediaPlayer = null;
 
-
     FirebaseAuth firebaseAuth = FirebaseAuth.getInstance();
     FirebaseAuth.AuthStateListener authStateListener;
 
@@ -54,8 +53,8 @@ public class GestureActivity extends AppCompatActivity {
 
         this.getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,WindowManager.LayoutParams.FLAG_FULLSCREEN);
 
-        mediaPlayer = MediaPlayer.create(getApplicationContext(), R.raw.swipeupdown);
-        mediaPlayer.start();
+        //mediaPlayer = MediaPlayer.create(getApplicationContext(), R.raw.swipeupdown);
+        //mediaPlayer.start();
 
 
         mDetector = new GestureDetectorCompat(this, new MyGestureListener());
@@ -89,7 +88,23 @@ public class GestureActivity extends AppCompatActivity {
             return true;
         }
 
+        @Override
+        public void onLongPress(MotionEvent e) {
+            super.onLongPress(e);
+            refresh();
+        }
 
+        @Override
+        public void onShowPress(MotionEvent e) {
+            super.onShowPress(e);
+            refresh();
+        }
+
+        @Override
+        public boolean onSingleTapConfirmed(MotionEvent e) {
+            refresh();
+            return super.onSingleTapConfirmed(e);
+        }
 
         @Override
         public boolean onFling(MotionEvent e1, MotionEvent e2,
@@ -103,6 +118,7 @@ public class GestureActivity extends AppCompatActivity {
 
                 case 2:
                     Log.d(DEBUG_TAG, "left");
+                    refresh();
                     return true;
 
                 case 3:
@@ -112,11 +128,15 @@ public class GestureActivity extends AppCompatActivity {
 
                 case 4:
                     Log.d(DEBUG_TAG, "right");
+                    refresh();
+                    return true;
+
+                default:
+                    refresh();
                     return true;
             }
-            return false;
-        }
 
+        }
 
 
         private int getSlope(float x1, float y1, float x2, float y2) {
@@ -157,10 +177,52 @@ public class GestureActivity extends AppCompatActivity {
         finish();
     }
 
+    public void refresh() {
+        Intent intent = getIntent();
+        overridePendingTransition(0, 0);
+        intent.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
+        finish();
+        overridePendingTransition(0, 0);
+        startActivity(intent);
+    }
+
     @Override
     public void onBackPressed() {
         super.onBackPressed();
         mediaPlayer.stop();
         mediaPlayer.release();
+    }
+
+    @Override
+    protected void onPostResume() {
+        super.onPostResume();
+        mediaPlayer = MediaPlayer.create(getApplicationContext(), R.raw.swipeupdown);
+        mediaPlayer.start();
+    }
+/*
+    @Override
+    public void onPause()
+    {
+        super.onPause();
+        mediaPlayer.stop();
+        mediaPlayer.release();
+    }
+*/
+
+    @Override
+    public void onStop()
+    {
+        super.onStop();
+        try{
+            if(mediaPlayer !=null && mediaPlayer.isPlaying()){
+                Log.d("TAG------->", "player is running");
+                mediaPlayer.stop();
+                Log.d("Tag------->", "player is stopped");
+                mediaPlayer.release();
+                Log.d("TAG------->", "player is released");
+            }
+        }catch(IllegalStateException e){
+            Log.d("IllegalStateException" , "it occurs");
+        }
     }
 }
