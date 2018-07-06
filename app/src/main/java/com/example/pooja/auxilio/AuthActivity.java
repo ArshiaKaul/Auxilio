@@ -46,8 +46,8 @@ public class AuthActivity extends AppCompatActivity {
     public static String ip_address_entered   = null;
 
     // set authentication
-    String app_id = "b44ea952";   //app id
-    String api_key = "9d5cec3afba947522606cbfa90defd5c"; //api key
+    String app_id = "XXXXXXXXX";   //app id
+    String api_key = "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"; //api key
 
     private EditText phone_et;
     private EditText otp_et;
