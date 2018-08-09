@@ -90,8 +90,8 @@ public class APIActivity extends AppCompatActivity {
     private TextView goToHomescreen;
     private TextView deleteButton;
 
-    private String app_id = "XXXXXXX"; //app id
-    private String api_key = "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX";    //api key
+    private String app_id = "b44ea952"; //app id
+    private String api_key = "9d5cec3afba947522606cbfa90defd5c";    //api key
 
     //private static final int CAMERA_REQUEST_CODE = 1;
 
@@ -382,6 +382,8 @@ public class APIActivity extends AppCompatActivity {
                         checkSign.setVisibility(View.VISIBLE);
                         goToHomescreen.setVisibility(View.VISIBLE);
                         deleteButton.setVisibility(View.VISIBLE);
+
+                        Toast.makeText(APIActivity.this, "Not in contacts", Toast.LENGTH_SHORT).show();
 
                         mediaPlayer = MediaPlayer.create(getApplicationContext(), R.raw.personnotincontacts);
                         mediaPlayer.start();

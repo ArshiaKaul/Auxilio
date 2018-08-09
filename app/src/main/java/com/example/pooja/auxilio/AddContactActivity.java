@@ -214,8 +214,8 @@ public class AddContactActivity extends AppCompatActivity {
         try {
             Kairos myKairos = new Kairos();
             // set authentication
-            String app_id = "XXXXXXX";
-            String api_key = "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX";
+            String app_id = "b44ea952";
+            String api_key = "9d5cec3afba947522606cbfa90defd5c";
             myKairos.setAuthentication(getApplicationContext(), app_id, api_key);
             String image = uri.toString();
             String subjectId = "photo_" + photoCounter;
