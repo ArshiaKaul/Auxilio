@@ -73,7 +73,7 @@ public class AddContactActivity extends AppCompatActivity {
 
     private Kairos myKairos = new Kairos();
 
-    MediaPlayer mediaPlayer = null;
+    //MediaPlayer mediaPlayer = null;
 
 
     SharedPreferences spForUploadCounter;
@@ -94,8 +94,8 @@ public class AddContactActivity extends AppCompatActivity {
         setContentView(R.layout.activity_add_contact);
         this.getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,WindowManager.LayoutParams.FLAG_FULLSCREEN);
 
-        mediaPlayer = MediaPlayer.create(getApplicationContext(), R.raw.taptoopencamera);
-        mediaPlayer.start();
+       // mediaPlayer = MediaPlayer.create(getApplicationContext(), R.raw.taptoopencamera);
+       // mediaPlayer.start();
 
         //initializing spForUploadCounter sharedpreference with key_name = uploadCounter
         spForUploadCounter = getSharedPreferences("uploadCounter", 0);
@@ -111,7 +111,7 @@ public class AddContactActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
 
-                mediaPlayer.stop();
+              //  mediaPlayer.stop();
 
                 if(!checkPermission()){
                     requestPermission();
@@ -129,8 +129,8 @@ public class AddContactActivity extends AppCompatActivity {
         super.onActivityResult(requestCode, resultCode, data);
 
         if(requestCode == CAMERA_REQUEST_CODE && resultCode == RESULT_OK && data!= null){
-            mediaPlayer = MediaPlayer.create(getApplicationContext(), R.raw.waitwhilepicisuploaded);
-            mediaPlayer.start();
+           // mediaPlayer = MediaPlayer.create(getApplicationContext(), R.raw.waitwhilepicisuploaded);
+           // mediaPlayer.start();
 
             final Bitmap photo = (Bitmap) data.getExtras().get("data");
             //the tap to open camera button disappears
@@ -179,8 +179,8 @@ public class AddContactActivity extends AppCompatActivity {
             @Override
             public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
 
-                mediaPlayer.stop();
-                mediaPlayer.release();
+                //mediaPlayer.stop();
+               // mediaPlayer.release();
 
                 filepath.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
                     @Override
@@ -273,8 +273,8 @@ public class AddContactActivity extends AppCompatActivity {
     @Override
     public void onBackPressed() {
         super.onBackPressed();
-        mediaPlayer.stop();
-        mediaPlayer.release();
+       // mediaPlayer.stop();
+       // mediaPlayer.release();
     }
 
 
@@ -282,8 +282,8 @@ public class AddContactActivity extends AppCompatActivity {
     public void onStop()
     {
         super.onStop();
-        try{
-            if(mediaPlayer !=null && mediaPlayer.isPlaying()){
+       /* try{
+           /* if(mediaPlayer !=null && mediaPlayer.isPlaying()){
                 Log.d("TAG------->", "player is running");
                 mediaPlayer.stop();
                 Log.d("Tag------->", "player is stopped");
@@ -292,7 +292,7 @@ public class AddContactActivity extends AppCompatActivity {
             }
         }catch(IllegalStateException e){
             Log.d("IllegalStateException" , "it occurs");
-        }
+        }*/
     }
 
 }

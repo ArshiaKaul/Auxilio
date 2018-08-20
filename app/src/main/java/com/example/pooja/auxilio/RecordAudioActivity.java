@@ -57,7 +57,7 @@ public class RecordAudioActivity extends AppCompatActivity {
     private DatabaseReference mCount;
     public int audioCounter;
 
-    private MediaPlayer mediaPlayer = null;
+   // private MediaPlayer mediaPlayer = null;
 
 
     String uniquefilename;
@@ -76,8 +76,8 @@ public class RecordAudioActivity extends AppCompatActivity {
 
         this.getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,WindowManager.LayoutParams.FLAG_FULLSCREEN);
 
-        mediaPlayer = MediaPlayer.create(getApplicationContext(), R.raw.tapandholdtorecord);
-        mediaPlayer.start();
+        //mediaPlayer = MediaPlayer.create(getApplicationContext(), R.raw.tapandholdtorecord);
+        //mediaPlayer.start();
 
         storageReference = FirebaseStorage.getInstance().getReference();
 
@@ -95,8 +95,8 @@ public class RecordAudioActivity extends AppCompatActivity {
         checkSign.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                mediaPlayer.stop();
-                mediaPlayer.release();
+                //mediaPlayer.stop();
+                //mediaPlayer.release();
                 Intent intent = new Intent(RecordAudioActivity.this, GestureActivity.class);
                 startActivity(intent);
                 finish();
@@ -106,8 +106,8 @@ public class RecordAudioActivity extends AppCompatActivity {
         goToHomescreen.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                mediaPlayer.stop();
-                mediaPlayer.release();
+                //mediaPlayer.stop();
+                //mediaPlayer.release();
                 Intent intent = new Intent(RecordAudioActivity.this, GestureActivity.class);
                 startActivity(intent);
                 finish();
@@ -131,7 +131,7 @@ public class RecordAudioActivity extends AppCompatActivity {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
 
-                mediaPlayer.stop();
+                //mediaPlayer.stop();
 
                 if(event.getAction() == MotionEvent.ACTION_DOWN){
 
@@ -204,8 +204,8 @@ public class RecordAudioActivity extends AppCompatActivity {
                 mRecorder.release();
                 mRecorder = null;
 
-                mediaPlayer = MediaPlayer.create(getApplicationContext(), R.raw.waitwhilerecisuploaded);
-                mediaPlayer.start();
+                //mediaPlayer = MediaPlayer.create(getApplicationContext(), R.raw.waitwhilerecisuploaded);
+                //mediaPlayer.start();
 
                 Toast.makeText(this, "Uploading Audio...", Toast.LENGTH_SHORT).show();
                 uploadAudio();
@@ -250,7 +250,7 @@ public class RecordAudioActivity extends AppCompatActivity {
 
                     @Override
                     public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
-                        mediaPlayer.stop();
+                        //mediaPlayer.stop();
                         record_progressBar.setVisibility(ProgressBar.GONE);
                         checkSign.setVisibility(View.VISIBLE);
                         goToHomescreen.setVisibility(View.VISIBLE);
@@ -260,10 +260,10 @@ public class RecordAudioActivity extends AppCompatActivity {
                         editor.putInt("uploadCounter" , counter);
                         editor.commit();*/
 
-                        if(!mediaPlayer.isPlaying()){
+                        /*if(!mediaPlayer.isPlaying()){
                             mediaPlayer = MediaPlayer.create(getApplicationContext(), R.raw.taptogotohomescreen);
                             mediaPlayer.start();
-                        }
+                        }*/
 
                     }
                 });
@@ -283,8 +283,8 @@ public class RecordAudioActivity extends AppCompatActivity {
     @Override
     public void onBackPressed() {
         super.onBackPressed();
-        mediaPlayer.stop();
-        mediaPlayer.release();
+        /*mediaPlayer.stop();
+        mediaPlayer.release();*/
     }
 
 

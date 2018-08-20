@@ -29,7 +29,7 @@ public class GestureActivity extends AppCompatActivity {
 
     private TextView justExampletextView ;
     private GestureDetectorCompat mDetector;
-    private MediaPlayer mediaPlayer = null;
+    //private MediaPlayer mediaPlayer = null;
 
     FirebaseAuth firebaseAuth = FirebaseAuth.getInstance();
     FirebaseAuth.AuthStateListener authStateListener;
@@ -82,8 +82,8 @@ public class GestureActivity extends AppCompatActivity {
 
         @Override
         public boolean onDown(MotionEvent event) {
-            mediaPlayer.stop();
-            mediaPlayer.release();
+            //mediaPlayer.stop();
+            //mediaPlayer.release();
             Log.d(DEBUG_TAG,"onDown: " + event.toString());
             return true;
         }
@@ -189,23 +189,23 @@ public class GestureActivity extends AppCompatActivity {
     @Override
     public void onBackPressed() {
         super.onBackPressed();
-        mediaPlayer.stop();
-        mediaPlayer.release();
+       // mediaPlayer.stop();
+       // mediaPlayer.release();
     }
 
     @Override
     protected void onPostResume() {
         super.onPostResume();
-        mediaPlayer = MediaPlayer.create(getApplicationContext(), R.raw.swipeupdown);
-        mediaPlayer.start();
+       // mediaPlayer = MediaPlayer.create(getApplicationContext(), R.raw.swipeupdown);
+       // mediaPlayer.start();
     }
 /*
     @Override
     public void onPause()
     {
         super.onPause();
-        mediaPlayer.stop();
-        mediaPlayer.release();
+       // mediaPlayer.stop();
+       // mediaPlayer.release();
     }
 */
 
@@ -213,7 +213,7 @@ public class GestureActivity extends AppCompatActivity {
     public void onStop()
     {
         super.onStop();
-        try{
+        /*try{
             if(mediaPlayer !=null && mediaPlayer.isPlaying()){
                 Log.d("TAG------->", "player is running");
                 mediaPlayer.stop();
@@ -223,6 +223,6 @@ public class GestureActivity extends AppCompatActivity {
             }
         }catch(IllegalStateException e){
             Log.d("IllegalStateException" , "it occurs");
-        }
+        }*/
     }
 }
